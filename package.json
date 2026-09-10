@@ -1,0 +1,7 @@
+{
+  "name":"vts-energy-security-v2",
+  "version":"2.0.0",
+  "private":true,
+  "description":"VTS Energy & Security public website and Supabase-backed management portal",
+  "scripts":{"serve":"python3 -m http.server 8080"}
+}

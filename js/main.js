@@ -1,0 +1,21 @@
+import { getSettings, whatsappUrl } from './data.js';
+
+const nav = document.querySelector('#site-nav');
+const footer = document.querySelector('#site-footer');
+const page = document.body.dataset.page || '';
+let settings;
+
+function navMarkup(){return `<header class="nav" id="nav"><div class="container nav-inner"><a class="brand" href="index.html" aria-label="VTS Energy & Security home"><img src="assets/images/vts-logo.jpg" alt="VTS Energy & Security"></a><button class="nav-toggle" id="nav-toggle" aria-label="Open menu">☰</button><nav class="nav-links" aria-label="Primary"><a class="${page==='home'?'active':''}" href="index.html">Home</a><a class="${page==='services'?'active':''}" href="services.html">Services</a><a class="${page==='products'?'active':''}" href="products.html">Products</a><a class="${page==='about'?'active':''}" href="about.html">About</a><a class="${page==='contact'?'active':''}" href="contact.html">Contact</a><a class="nav-cta" href="contact.html">Request a Quote</a></nav></div></header>`}
+function footerMarkup(s){return `<footer class="site-footer"><div class="container"><div class="footer-grid"><div class="footer-col"><img class="footer-logo" src="assets/images/vts-logo.jpg" alt="VTS Energy & Security logo"><p>Integrated energy and digital security solutions for Southern Africa.</p></div><div class="footer-col"><h4>Quick Links</h4><a href="index.html">Home</a><a href="services.html">Services</a><a href="products.html">Products</a><a href="about.html">About</a><a href="contact.html">Contact</a><a class="footer-vts" href="admin/">VTS</a></div><div class="footer-col"><h4>Solutions</h4><a href="services.html#energy">Energy Solutions</a><a href="services.html#security">Digital Security</a><a href="products.html">Product Catalogue</a></div><div class="footer-col"><h4>Contact</h4><a href="tel:${s.phone.replace(/\s/g,'')}">${s.phone}</a>${s.phone2?`<a href="tel:${s.phone2.replace(/\s/g,'')}">${s.phone2}</a>`:''}<a href="mailto:${s.sales_email}">${s.sales_email}</a><a href="mailto:${s.info_email}">${s.info_email}</a><p>${s.address}</p></div></div><div class="footer-bottom"><span>© 2026 VTS Energy & Security. All Rights Reserved.</span><span>${s.legal_name} · ${s.registration_number}</span></div></div></footer>`}
+function toast(message,type='success'){const el=document.createElement('div');el.className='toast';el.textContent=message;document.body.appendChild(el);setTimeout(()=>el.remove(),3400)}
+window.VTS={toast,whatsappUrl,get settings(){return settings}};
+
+async function boot(){
+  if(nav){nav.innerHTML=navMarkup();document.querySelector('#nav-toggle')?.addEventListener('click',()=>document.querySelector('#nav').classList.toggle('open'))}
+  try{settings=await getSettings()}catch(e){settings=undefined;toast('Live company data could not be loaded. Check Supabase configuration.','error')}
+  if(footer) footer.innerHTML=footerMarkup(settings||{phone:'+27 33 032 2153',phone2:'+27 82 269 2150',sales_email:'sales@vtsenergysecurity.co.za',info_email:'info@vtsenergysecurity.co.za',address:'18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa',legal_name:'Volt Tech Solutions (Pty) Ltd',registration_number:'2023/259917/7'});
+  const coverage=document.querySelectorAll('#coverage-list');
+  if(settings?.coverage) coverage.forEach(el=>el.innerHTML=settings.coverage.split('|').map(x=>`<span>${x.trim()}</span>`).join(''));
+  const homeWa=document.querySelector('#home-wa'); if(homeWa) homeWa.href=whatsappUrl(settings?.whatsapp);
+}
+boot();
