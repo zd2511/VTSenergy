@@ -1,5 +1,5 @@
 console.info('VTS products.js loaded: v20260911-1530');
-import { getPublicProducts, getFeaturedProducts, getSettings, formatPrice, formatMoney, hasPromotion, whatsappUrl } from './data.js?v20260911-1530-fixed';
+import { getPublicProducts, getFeaturedProducts, getSettings, formatPrice, formatMoney, hasPromotion, whatsappUrl } from './data.js?v20260911-1648-stable';
 
 let allProducts=[]; let siteSettings;
 const imgFallback='https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80';

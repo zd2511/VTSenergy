@@ -1,4 +1,4 @@
-import { REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1530-fixed';
+import { REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1648-stable';
 
 function boot(){
   document.querySelector('#mission-text').textContent=REQUIRED_MISSION;
