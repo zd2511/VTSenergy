@@ -1,4 +1,4 @@
-import { supabase } from './supabase.js?v20260911-1719-product-fix';
+import { supabase } from './supabase.js?v20260911-1648-stable';
 
 const REQUEST_TIMEOUT=10000;
 function timed(promise,label='The VTS data service timed out.'){return Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label)),REQUEST_TIMEOUT))])}

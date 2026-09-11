@@ -1,7 +1,7 @@
-console.info('VTS admin.js loaded: v20260911-1719-product-fix');
-import { supabase } from './supabase.js?v20260911-1719-product-fix';
-import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1719-product-fix';
-import { ADMIN_EMAIL } from './config.js?v20260911-1719-product-fix';
+console.info('VTS admin.js loaded: v20260911-1719-product-debug');
+import { supabase } from './supabase.js?v20260911-1719-product-debug';
+import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1719-product-debug';
+import { ADMIN_EMAIL } from './config.js?v20260911-1719-product-debug';
 
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 let products=[], categories=[], settings;
@@ -275,18 +275,19 @@ async function saveProduct(e){
     // The promotion columns live in the supplied migration, but an existing
     // Supabase project may still be using the older products table/schema cache.
     // In that case, save the core product instead of leaving the editor stuck.
-    let promotionFallback=false;
     if(res.error && /original_price|sale_price|promotion_status|promotion_type/i.test(res.error.message||'')){
+      if(promotionEnabled){
+        throw new Error('Promotion fields are not available in the Supabase products table. Run supabase/migration_promotions.sql, reload the PostgREST schema cache, then try again. No product was saved.');
+      }
       const core={...data};
       delete core.promotion_status; delete core.promotion_type; delete core.original_price; delete core.sale_price;
-      if(id)res=await withTimeout(supabase.from('products').update(core).eq('id',id).select().single(),15000,'Product save timed out. Please check Supabase connectivity and try again.');
-      else res=await withTimeout(supabase.from('products').insert(core).select().single(),15000,'Product save timed out. Please check Supabase connectivity and try again.');
-      promotionFallback=true;
+      res=id
+        ? await withTimeout(supabase.from('products').update(core).eq('id',id).select().single(),15000,'Product save timed out. Please check Supabase connectivity and try again.')
+        : await withTimeout(supabase.from('products').insert(core).select().single(),15000,'Product save timed out. Please check Supabase connectivity and try again.');
     }
     // Older V2 databases may not yet have the optional specifications column.
     if(res.error && /specifications.*column|column.*specifications/i.test(res.error.message||'')){
       const retry={...data};delete retry.specifications;
-      if(promotionFallback){delete retry.promotion_status;delete retry.promotion_type;delete retry.original_price;delete retry.sale_price;}
       if(id)res=await withTimeout(supabase.from('products').update(retry).eq('id',id).select().single(),15000,'Product save timed out. Please check Supabase connectivity and try again.');
       else res=await withTimeout(supabase.from('products').insert(retry).select().single(),15000,'Product save timed out. Please check Supabase connectivity and try again.');
     }
@@ -295,11 +296,7 @@ async function saveProduct(e){
     const saved=res.data;
     if(id)products=products.map(p=>p.id===id?saved:p);else products=[saved,...products];
     renderProducts();renderDashboard(serviceRows);syncProductCaches();
-    if(promotionFallback){
-      toast('Product saved. Promotion pricing needs the Supabase promotion migration.','error');
-    }else{
-      toast(`Product ${id?'updated':'added'} successfully.`);
-    }
+    toast(`Product ${id?'updated':'added'} successfully.`);
     closeEditor();
   }catch(err){
     console.error('Product save failed:',err);
