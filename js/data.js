@@ -3,7 +3,7 @@ import { supabase } from './supabase.js';
 export const REQUIRED_PHONE = '+27 33 032 2153';
 export const REQUIRED_PHONE2 = '+27 82 269 2150';
 export const REQUIRED_WHATSAPP = '+27822692150';
-export const HOMEPAGE_COVERAGE = 'Zimbabwe, Zambia, Botswana, Namibia, Mozambique, Lesotho, Eswatini, and Malaw';
+export const HOMEPAGE_COVERAGE = 'South Africa | Zimbabwe | Zambia | Botswana | Namibia | Mozambique | Lesotho | Eswatini | Malawi';
 export const REQUIRED_MISSION = 'To provide reliable, affordable, and professional energy and security solutions that keep African businesses and communities powered, protected, and productive.';
 export const REQUIRED_VISION = "To become Southern Africa's most trusted partner for integrated energy resilience and digital protection.";
 export const REQUIRED_VALUES = 'Reliability — We deliver what we promise, on time and to standard. | Trust — We build long-term relationships through honesty and transparency. | Excellence — We use quality products and certified professionals. | Innovation — We embrace modern technology to solve African challenges. | Safety — We protect people, property, and data at all times.';
@@ -58,7 +58,20 @@ export async function getServices() {
   return data || [];
 }
 
+export function formatMoney(value) {
+  if (value === null || value === undefined || value === '') return '';
+  const n = Number(value);
+  return Number.isFinite(n) ? `R${new Intl.NumberFormat('en-ZA', { maximumFractionDigits: 2 }).format(n)}` : String(value);
+}
+
+export function hasPromotion(product) {
+  return Boolean(product?.promotion_status && product.promotion_status !== 'none' &&
+    product?.original_price !== null && product?.original_price !== undefined &&
+    product?.sale_price !== null && product?.sale_price !== undefined);
+}
+
 export function formatPrice(product) {
+  if (hasPromotion(product)) return formatMoney(product.sale_price);
   if (product.price_type === 'quote') return 'Request a Quote';
   if (product.price === null || product.price === undefined || product.price === '') return 'Request a Quote';
   const value = Number(product.price);

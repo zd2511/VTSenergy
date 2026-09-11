@@ -1,5 +1,5 @@
 import { supabase } from './supabase.js';
-import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js';
+import { formatPrice, formatMoney, hasPromotion, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js';
 import { ADMIN_EMAIL } from './config.js';
 
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
@@ -29,7 +29,7 @@ async function boot(){
   $$('.admin-sidebar nav button').forEach(b=>b.addEventListener('click',()=>{showSection(b.dataset.section);closeMobileNav()}));
   $$('[data-go]').forEach(b=>b.addEventListener('click',()=>showSection(b.dataset.go)));
   $('#add-product').addEventListener('click',()=>openEditor());
-  $('#product-form').addEventListener('submit',saveProduct);
+  $('#product-form').addEventListener('submit',saveProduct);$('#product-form').elements.promotion_enabled.addEventListener('change',togglePromotionFields);
   $('#product-image').addEventListener('change',previewImage);
   $('#clear-image').addEventListener('click',clearImage);
   $$('[data-close-editor]').forEach(b=>b.addEventListener('click',closeEditor));
@@ -83,7 +83,7 @@ async function loadData(){
   }catch(e){console.error('Management data load failed:',e);toast('Could not load management data. Please check the connection and permissions.','error')}
 }
 function renderDashboard(services){$('#stat-products').textContent=products.length;$('#stat-featured').textContent=products.filter(p=>p.featured).length;$('#stat-energy').textContent=services.filter(s=>s.category==='Energy Solutions').length;$('#stat-security').textContent=services.filter(s=>s.category==='Digital Security Solutions').length;$('#dashboard-recent').innerHTML=products.slice(0,5).map(p=>`<div class="recent-item"><strong>${esc(p.name)}</strong><small>${esc(p.category)} • ${p.active?'Active':'Inactive'}</small></div>`).join('')}
-function renderProducts(){$('#product-table').innerHTML=products.map(p=>`<tr><td><img class="table-img" src="${esc(p.image_url||imgFallback)}" alt=""></td><td><b>${esc(p.name)}</b>${p.is_demo?'<br><small style="color:#f59e0b">Demo</small>':''}</td><td>${esc(p.category)}</td><td>${formatPrice(p)}</td><td>${p.active?'✓':'✗'}</td><td>${p.featured?'✓':'✗'}</td><td><div class="action-row"><button class="mini-btn" data-edit="${esc(p.id)}" type="button">Edit</button><button class="mini-btn" data-toggle="${esc(p.id)}" type="button">${p.active?'Hide':'Show'}</button><button class="mini-btn danger" data-delete="${esc(p.id)}" type="button">Delete</button></div></td></tr>`).join('')||'<tr><td colspan="7">No products found.</td></tr>';
+function renderProducts(){$('#product-table').innerHTML=products.map(p=>`<tr><td><img class="table-img" src="${esc(p.image_url||imgFallback)}" alt=""></td><td><b>${esc(p.name)}</b>${p.is_demo?'<br><small style="color:#f59e0b">Demo</small>':''}</td><td>${esc(p.category)}</td><td>${hasPromotion(p)?`<span class="admin-promo-badge">${p.promotion_type==='special_offer'?'Special Offer':'On Sale'}</span><br><del>${formatMoney(p.original_price)}</del> <b>${formatMoney(p.sale_price)}</b>`:formatPrice(p)}</td><td>${p.active?'✓':'✗'}</td><td>${p.featured?'✓':'✗'}</td><td><div class="action-row"><button class="mini-btn" data-edit="${esc(p.id)}" type="button">Edit</button><button class="mini-btn" data-toggle="${esc(p.id)}" type="button">${p.active?'Hide':'Show'}</button><button class="mini-btn danger" data-delete="${esc(p.id)}" type="button">Delete</button></div></td></tr>`).join('')||'<tr><td colspan="7">No products found.</td></tr>';
   $('#product-table').querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>openEditor(products.find(p=>p.id===b.dataset.edit))));
   $('#product-table').querySelectorAll('[data-toggle]').forEach(b=>b.addEventListener('click',()=>toggleProduct(b.dataset.toggle)));
   $('#product-table').querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',()=>deleteProduct(b.dataset.delete)));
@@ -104,10 +104,16 @@ function fillCompany(){
 function openEditor(p){
   const form=$('#product-form');form.reset();$('#editor-error').classList.add('hidden');newImageFile=null;currentImagePath=p?.image_url||null;$('#product-image').value='';
   fillCategories();
+  const promotionEnabled=form.elements.promotion_enabled;
   if(p){
     $('#editor-title').textContent='Edit Product';
     Object.entries(p).forEach(([k,v])=>{const el=form.elements[k];if(el)el.value=typeof v==='object'?arrayLines(v):v??''});
   }else $('#editor-title').textContent='Add Product';
+  promotionEnabled.checked=hasPromotion(p);
+  form.elements.promotion_type.value=p?.promotion_type||'on_sale';
+  form.elements.original_price.value=p?.original_price??'';
+  form.elements.sale_price.value=p?.sale_price??'';
+  togglePromotionFields();
   renderImagePreview(currentImagePath);
   $('#product-editor').classList.remove('hidden');$('#product-editor').setAttribute('aria-hidden','false');
   setTimeout(()=>form.elements.name.focus(),0);
@@ -133,6 +139,7 @@ async function uploadImage(file){
   return data.publicUrl;
 }
 function parseLines(value){return String(value||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean)}
+function togglePromotionFields(){const enabled=$('#product-form')?.elements.promotion_enabled?.checked;document.querySelector('.promotion-fields')?.classList.toggle('promotion-disabled',!enabled)}
 async function saveProduct(e){
   e.preventDefault();
   if(productSaving)return;
@@ -144,12 +151,23 @@ async function saveProduct(e){
     const name=f.elements.name.value.trim();
     if(!name)throw new Error('Product name is required.');
     const priceValue=f.elements.price.value.trim();
+    const promotionEnabled=f.elements.promotion_enabled.checked;
+    const originalPrice=f.elements.original_price.value.trim();
+    const salePrice=f.elements.sale_price.value.trim();
+    if(promotionEnabled){
+      if(originalPrice===''||salePrice==='')throw new Error('Original price and sale/current price are required for a promotion.');
+      if(Number(salePrice)>=Number(originalPrice))throw new Error('Sale/current price must be lower than the original price.');
+    }
     const data={
       name,category:f.elements.category.value,slug:slugify(name),
       short_description:f.elements.short_description.value.trim(),
       description:f.elements.description.value.trim(),
       price:priceValue===''?null:Number(priceValue),
       price_type:f.elements.price_type.value,
+      promotion_status:promotionEnabled?'active':'none',
+      promotion_type:promotionEnabled?f.elements.promotion_type.value:'on_sale',
+      original_price:promotionEnabled?Number(originalPrice):null,
+      sale_price:promotionEnabled?Number(salePrice):null,
       active:f.elements.active.checked,featured:f.elements.featured.checked,
       display_order:Math.max(0,parseInt(f.elements.display_order.value,10)||0)
     };
