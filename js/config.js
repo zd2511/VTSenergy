@@ -1,5 +1,5 @@
 // Copy to config.js. These values are public client configuration.
-export const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
-export const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_OR_PUBLISHABLE_KEY';
+export const SUPABASE_URL = 'https://donxbixevnfqphirejuq.supabase.co';
+export const SUPABASE_ANON_KEY = 'sb_publishable_I9JmOOjyvTUbX4O9hDVWEA_qnSXYu6f';
 // The administrator email is not a secret. The password is never stored here.
-export const ADMIN_EMAIL = 'YOUR-ADMIN-EMAIL';
+export const ADMIN_EMAIL = 'admin@vtsenergy.com';
