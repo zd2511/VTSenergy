@@ -1,11 +1,22 @@
-console.info('VTS admin.js loaded: v20260911-1650-stable');
-import { supabase } from './supabase.js?v20260911-1650-stable';
-import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1650-stable';
-import { ADMIN_EMAIL } from './config.js?v20260911-1650-stable';
+console.info('VTS admin.js loaded: v20260911-1719-product-fix');
+import { supabase } from './supabase.js?v20260911-1719-product-fix';
+import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1719-product-fix';
+import { ADMIN_EMAIL } from './config.js?v20260911-1719-product-fix';
 
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 let products=[], categories=[], settings;
 let currentImagePath=null, newImageFile=null, productSaving=false, serviceRows=[], editorSession=0, authBusy=false;
+const DEFAULT_PRODUCT_CATEGORIES = [
+  'Solar',
+  'Inverters',
+  'Batteries',
+  'UPS',
+  'CCTV',
+  'Access Control',
+  'Security Systems',
+  'Cybersecurity',
+  'Other'
+];
 const imgFallback='../assets/images/vts-logo.jpg';
 function imageSrc(value){const v=String(value||'').trim();return /^https?:\/\//i.test(v)?v:imgFallback;}
 function formatMoney(value){ if(value===null||value===undefined||value==='') return ''; const n=Number(value); return Number.isFinite(n)?`R${new Intl.NumberFormat('en-ZA',{maximumFractionDigits:2}).format(n)}`:String(value); }
@@ -54,7 +65,7 @@ async function boot(){
   $('#mobile-menu').addEventListener('click',toggleMobileNav);
   $$('.admin-sidebar nav button').forEach(b=>b.addEventListener('click',()=>{showSection(b.dataset.section);closeMobileNav()}));
   $$('[data-go]').forEach(b=>b.addEventListener('click',()=>showSection(b.dataset.go)));
-  $('#add-product').addEventListener('click',()=>openEditor());
+  $('#add-product')?.addEventListener('click',()=>openEditor());
   $('#product-form').addEventListener('submit',saveProduct);$('#product-form').elements.promotion_enabled.addEventListener('change',togglePromotionFields);
   $('#product-image').addEventListener('change',previewImage);
   $('#clear-image').addEventListener('click',clearImage);
