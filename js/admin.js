@@ -64,24 +64,16 @@ async function boot(){
   $('#save-company').addEventListener('click',saveCompany);
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMobileNav();if(!$('#product-editor').classList.contains('hidden'))closeEditor()}});
   $('#admin-nav-backdrop')?.addEventListener('click',closeMobileNav);
-  try{
-    const {data:{session}}=await withTimeout(supabase.auth.getSession(),10000,'Administrator session check timed out. Please check your internet connection and Supabase configuration.');
-    if(session){
-      try{ if(await isAdmin(session?.user?.id)) showApp(); else { await supabase.auth.signOut(); showLogin(); } }
-      catch(err){ console.error(err); showLogin(); error(err.message); }
-    }else showLogin();
-  }catch(err){
-    console.error('Admin session check failed:',err);
-    showLogin();
-    error(`Unable to connect to the administrator service. ${err?.message||'Please check your internet connection and Supabase configuration.'}`);
-  }
-  supabase.auth.onAuthStateChange(async(_event,s)=>{
-    if(!s){ if(!authBusy) showLogin(); return; }
-    if(authBusy) return;
-    try{
-      if(await isAdmin(s?.user?.id)) showApp();
-      else { await withTimeout(supabase.auth.signOut(),10000,'Sign-out timed out.'); showLogin(); error('This account is authenticated but is not registered as a VTS administrator.'); }
-    }catch(err){console.error(err);showLogin();error(err.message||'Administrator verification failed.');}
+  // Do not block the login screen on an automatic Supabase session check.
+  // Supabase auth state can be locked by another browser tab/extension and
+  // getSession() may wait indefinitely even when the REST API is healthy.
+  // The password login below performs the authoritative check after sign-in.
+  showLogin();
+  supabase.auth.onAuthStateChange((_event,s)=>{
+    if(!s && !authBusy) showLogin();
+    // Deliberately do not call isAdmin() from the auth-state callback.
+    // signInWithPassword() already verifies the credentials and login() then
+    // performs the direct admin_users lookup exactly once.
   });
 
   document.addEventListener('click',e=>{

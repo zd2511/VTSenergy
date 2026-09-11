@@ -30,3 +30,13 @@ create policy product_images_admin_update on storage.objects for update to authe
 create policy product_images_admin_delete on storage.objects for delete to authenticated using(bucket_id='product-images' and public.is_admin());
 
 notify pgrst, 'reload schema';
+
+-- Allow an authenticated user to verify only their own administrator row.
+-- The admin UI uses this direct lookup instead of relying on the is_admin() RPC.
+drop policy if exists admin_users_self_read on public.admin_users;
+create policy admin_users_self_read
+on public.admin_users
+for select
+to authenticated
+using (user_id = auth.uid());
+
