@@ -1,47 +1,65 @@
 <!doctype html>
-
 <html lang="en-ZA">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>VTS Management Portal</title>
-<meta name="robots" content="noindex,nofollow"><link rel="icon" href="../assets/images/vts-logo.jpg"><link rel="preconnect" href="https://fonts.googleapis.com">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VTS Energy & Security | Admin</title>
+<meta name="theme-color" content="#07100b">
+<meta name="robots" content="noindex,nofollow">
+
+<link rel="icon" href="../assets/images/vts-logo.jpg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"><style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
 :root{
-  --bg:#07100b;
-  --bg2:#0b1710;
-  --panel:#101d15;
-  --panel2:#13251a;
-  --border:rgba(255,255,255,.09);
+  --bg:#050906;
+  --bg2:#08110b;
+  --panel:#0b1510;
+  --panel2:#0f1b14;
+  --line:rgba(255,255,255,.09);
+  --line2:rgba(255,255,255,.14);
   --text:#f4f8f5;
-  --muted:#91a198;
-  --green:#36d477;
-  --green2:#19a95a;
-  --danger:#ff5d69;
-  --warning:#ffbf55;
-  --shadow:0 20px 60px rgba(0,0,0,.35);
+  --muted:#8d9b91;
+  --green:#65e58a;
+  --green2:#31b85d;
+  --danger:#ff6565;
+  --warning:#f5c76a;
+  --shadow:0 25px 70px rgba(0,0,0,.38);
+  --sidebar:270px;
 }
 
 *{
   box-sizing:border-box;
 }
 
-html,body{
-  margin:0;
-  padding:0;
-  width:100%;
+html{
   min-height:100%;
   background:var(--bg);
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 15% 10%,rgba(65,180,100,.08),transparent 28%),
+    radial-gradient(circle at 90% 85%,rgba(40,130,70,.06),transparent 30%),
+    var(--bg);
   color:var(--text);
   font-family:Inter,Arial,sans-serif;
 }
 
-body{
-  overflow-x:hidden;
+button,
+input,
+select,
+textarea{
+  font:inherit;
 }
 
 button{
-  font:inherit;
+  cursor:pointer;
 }
 
 a{
@@ -49,252 +67,421 @@ a{
   text-decoration:none;
 }
 
-/* BACKGROUND */
-
-body:before{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:
-    radial-gradient(circle at 10% 10%,rgba(54,212,119,.10),transparent 30%),
-    radial-gradient(circle at 90% 80%,rgba(54,212,119,.07),transparent 30%);
-  z-index:0;
+.hidden{
+  display:none!important;
 }
 
-/* LAYOUT */
+/* =========================
+   LOGIN
+========================= */
 
-.admin-shell{
-  position:relative;
-  z-index:1;
+#login-view{
+  min-height:100vh;
   display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+
+.login-wrap{
+  width:100%;
+  max-width:440px;
+}
+
+.login-brand{
+  text-align:center;
+  margin-bottom:28px;
+}
+
+.login-brand img{
+  width:82px;
+  height:82px;
+  object-fit:cover;
+  border-radius:20px;
+  border:1px solid var(--line2);
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+
+.login-brand h1{
+  margin:18px 0 5px;
+  font-family:"Space Grotesk",sans-serif;
+  font-size:26px;
+}
+
+.login-brand p{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.login-card{
+  background:rgba(11,21,16,.88);
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:30px;
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(20px);
+}
+
+.login-card h2{
+  margin:0 0 7px;
+  font-family:"Space Grotesk",sans-serif;
+  font-size:22px;
+}
+
+.login-card .login-sub{
+  margin:0 0 25px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.6;
+}
+
+.form-group{
+  margin-bottom:17px;
+}
+
+.form-group label{
+  display:block;
+  margin-bottom:8px;
+  color:#c8d2cb;
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+  width:100%;
+  border:1px solid var(--line2);
+  outline:none;
+  background:#07100b;
+  color:var(--text);
+  border-radius:12px;
+  padding:13px 14px;
+  transition:.2s;
+}
+
+.form-group textarea{
+  min-height:120px;
+  resize:vertical;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+  border-color:rgba(101,229,138,.65);
+  box-shadow:0 0 0 3px rgba(101,229,138,.08);
+}
+
+.login-error{
+  margin-bottom:15px;
+  border:1px solid rgba(255,101,101,.25);
+  background:rgba(255,101,101,.08);
+  color:#ff9b9b;
+  padding:11px 13px;
+  border-radius:10px;
+  font-size:13px;
+  line-height:1.5;
+}
+
+.btn{
+  border:0;
+  border-radius:12px;
+  padding:13px 17px;
+  font-weight:700;
+  transition:.2s;
+}
+
+.btn-primary{
+  width:100%;
+  background:var(--green);
+  color:#061008;
+}
+
+.btn-primary:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.05);
+}
+
+/* =========================
+   ADMIN APP
+========================= */
+
+#app-view{
   min-height:100vh;
 }
 
-/* SIDEBAR */
+.admin-layout{
+  min-height:100vh;
+  display:flex;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
 
 .admin-sidebar{
-  width:270px;
-  min-width:270px;
-  min-height:100vh;
   position:fixed;
-  left:0;
-  top:0;
-  bottom:0;
-  padding:22px 16px;
-  background:rgba(7,16,11,.97);
-  border-right:1px solid var(--border);
   z-index:1000;
+  inset:0 auto 0 0;
+  width:var(--sidebar);
+  background:
+    linear-gradient(180deg,#0a1510 0%,#07100b 100%);
+  border-right:1px solid var(--line);
   display:flex;
   flex-direction:column;
+  padding:22px 16px;
+  overflow-y:auto;
 }
 
-.brand{
+.sidebar-brand{
   display:flex;
   align-items:center;
   gap:12px;
-  padding:8px 10px 25px;
+  padding:5px 8px 24px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:18px;
 }
 
-.brand img{
+.sidebar-brand img{
   width:46px;
   height:46px;
-  border-radius:12px;
   object-fit:cover;
-  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
 }
 
-.brand-text{
-  min-width:0;
-}
-
-.brand-title{
+.sidebar-brand strong{
+  display:block;
   font-family:"Space Grotesk",sans-serif;
-  font-weight:700;
-  font-size:17px;
+  font-size:14px;
 }
 
-.brand-subtitle{
-  color:var(--muted);
-  font-size:11px;
+.sidebar-brand span{
+  display:block;
   margin-top:3px;
-}
-
-.nav-label{
-  color:#68786f;
+  color:var(--green);
   font-size:10px;
-  font-weight:700;
-  letter-spacing:1.5px;
-  padding:14px 12px 8px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
 }
 
-.nav{
+.sidebar-label{
+  color:#5f6d63;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.12em;
+  padding:0 10px 9px;
+  text-transform:uppercase;
+}
+
+.admin-sidebar nav{
   display:flex;
   flex-direction:column;
   gap:5px;
 }
 
-.nav button{
+.admin-sidebar nav button{
   width:100%;
-  border:0;
+  border:1px solid transparent;
   background:transparent;
-  color:#aab7af;
-  border-radius:12px;
-  padding:12px 13px;
+  color:#9aa69e;
+  padding:12px 12px;
+  border-radius:11px;
   text-align:left;
-  cursor:pointer;
+  font-weight:600;
+  font-size:13px;
   display:flex;
   align-items:center;
-  gap:12px;
-  transition:.2s ease;
+  gap:11px;
+  transition:.2s;
 }
 
-.nav button:hover{
-  background:rgba(255,255,255,.05);
-  color:white;
+.admin-sidebar nav button:hover{
+  color:#fff;
+  background:rgba(255,255,255,.035);
 }
 
-.nav button.active{
-  background:rgba(54,212,119,.12);
-  color:#69e798;
-  box-shadow:inset 3px 0 0 var(--green);
+.admin-sidebar nav button.active{
+  color:#eaffef;
+  background:rgba(101,229,138,.09);
+  border-color:rgba(101,229,138,.15);
 }
 
 .nav-icon{
-  width:24px;
-  text-align:center;
-  font-size:17px;
+  width:25px;
+  height:25px;
+  border-radius:8px;
+  display:grid;
+  place-items:center;
+  background:rgba(255,255,255,.045);
+  font-size:12px;
+}
+
+.admin-sidebar nav button.active .nav-icon{
+  background:rgba(101,229,138,.15);
+  color:var(--green);
 }
 
 .sidebar-bottom{
   margin-top:auto;
+  padding-top:18px;
+  border-top:1px solid var(--line);
 }
 
-.status-box{
-  border:1px solid var(--border);
-  background:rgba(255,255,255,.025);
-  border-radius:14px;
-  padding:13px;
-  margin:10px 0;
+.admin-user{
+  padding:10px;
+  margin-bottom:8px;
 }
 
-.status-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
+.admin-user small{
+  display:block;
+  color:#647168;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+.admin-user strong{
+  display:block;
+  margin-top:4px;
   font-size:12px;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
-.status-dot{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:var(--green);
-  box-shadow:0 0 12px var(--green);
+.logout-btn{
+  width:100%;
+  padding:11px 12px;
+  border-radius:10px;
+  border:1px solid rgba(255,101,101,.15);
+  background:rgba(255,101,101,.05);
+  color:#ff9292;
+  font-weight:700;
 }
 
-/* MAIN */
+.logout-btn:hover{
+  background:rgba(255,101,101,.1);
+}
+
+.sidebar-close{
+  display:none;
+}
+
+.sidebar-backdrop{
+  display:none;
+}
+
+/* =========================
+   MAIN
+========================= */
 
 .admin-main{
-  width:calc(100% - 270px);
-  margin-left:270px;
-  min-height:100vh;
+  width:calc(100% - var(--sidebar));
+  margin-left:var(--sidebar);
+  min-width:0;
 }
 
-/* TOPBAR */
-
 .admin-topbar{
-  min-height:78px;
-  padding:16px 28px;
-  border-bottom:1px solid var(--border);
-  background:rgba(7,16,11,.78);
-  backdrop-filter:blur(18px);
+  position:sticky;
+  top:0;
+  z-index:500;
+  height:76px;
   display:flex;
   align-items:center;
   justify-content:space-between;
+  padding:0 30px;
+  background:rgba(5,9,6,.86);
+  border-bottom:1px solid var(--line);
+  backdrop-filter:blur(18px);
+}
+
+.topbar-left{
+  display:flex;
+  align-items:center;
   gap:15px;
-  position:sticky;
-  top:0;
-  z-index:900;
-}
-
-.topbar-title{
-  font-family:"Space Grotesk",sans-serif;
-  font-size:22px;
-  font-weight:700;
-}
-
-.topbar-subtitle{
-  color:var(--muted);
-  font-size:12px;
-  margin-top:3px;
-}
-
-.topbar-right{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.live-pill{
-  display:flex;
-  align-items:center;
-  gap:7px;
-  border:1px solid rgba(54,212,119,.22);
-  background:rgba(54,212,119,.08);
-  color:#6bea9a;
-  padding:8px 11px;
-  border-radius:999px;
-  font-size:11px;
-  font-weight:700;
 }
 
 .mobile-menu{
   display:none;
-  width:44px;
-  height:44px;
-  border:1px solid var(--border);
-  background:var(--panel);
-  color:white;
-  border-radius:12px;
-  cursor:pointer;
+  width:40px;
+  height:40px;
+  border:1px solid var(--line2);
+  border-radius:10px;
+  background:#0b1510;
+  color:#fff;
+  font-size:20px;
+}
+
+.topbar-title{
+  font-family:"Space Grotesk",sans-serif;
   font-size:21px;
+  font-weight:700;
 }
 
-/* CONTENT */
+.topbar-right{
+  color:var(--muted);
+  font-size:12px;
+}
 
-.content{
-  padding:28px;
+.admin-content{
+  padding:30px;
   max-width:1500px;
-  margin:auto;
 }
 
-.page{
-  display:none;
+/* =========================
+   SECTIONS
+========================= */
+
+.admin-section{
+  animation:sectionIn .25s ease;
 }
 
-.page.active{
-  display:block;
+@keyframes sectionIn{
+  from{
+    opacity:0;
+    transform:translateY(5px);
+  }
+  to{
+    opacity:1;
+    transform:none;
+  }
 }
 
-/* CARDS */
+.section-heading{
+  margin-bottom:25px;
+}
+
+.section-heading h2{
+  margin:0 0 6px;
+  font-family:"Space Grotesk",sans-serif;
+  font-size:30px;
+}
+
+.section-heading p{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+}
+
+/* =========================
+   DASHBOARD
+========================= */
 
 .stat-grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:16px;
-  margin-bottom:22px;
-}
-
-.card{
-  background:linear-gradient(145deg,rgba(19,37,26,.95),rgba(10,23,15,.95));
-  border:1px solid var(--border);
-  border-radius:18px;
-  box-shadow:var(--shadow);
+  margin-bottom:25px;
 }
 
 .stat-card{
-  padding:20px;
+  background:linear-gradient(145deg,rgba(16,29,21,.95),rgba(9,17,12,.95));
+  border:1px solid var(--line);
+  border-radius:17px;
+  padding:21px;
+  min-height:135px;
   position:relative;
   overflow:hidden;
 }
@@ -304,404 +491,566 @@ body:before{
   position:absolute;
   width:100px;
   height:100px;
-  right:-40px;
-  bottom:-40px;
-  background:rgba(54,212,119,.08);
+  right:-45px;
+  bottom:-45px;
   border-radius:50%;
+  background:rgba(101,229,138,.06);
 }
 
-.stat-icon{
-  font-size:23px;
-  margin-bottom:15px;
-}
-
-.stat-number{
-  font-family:"Space Grotesk",sans-serif;
-  font-size:31px;
-  font-weight:700;
-}
-
-.stat-name{
+.stat-label{
   color:var(--muted);
-  font-size:12px;
-  margin-top:5px;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
 }
 
-/* DASHBOARD */
-
-.section-title{
+.stat-value{
+  display:block;
+  margin-top:15px;
   font-family:"Space Grotesk",sans-serif;
-  font-size:18px;
-  margin:0 0 5px;
+  font-size:36px;
 }
 
-.section-subtitle{
-  color:var(--muted);
-  font-size:12px;
-  margin-bottom:18px;
+.stat-accent{
+  color:var(--green);
 }
 
-.grid-2{
+.dashboard-grid{
   display:grid;
-  grid-template-columns:1.4fr 1fr;
+  grid-template-columns:1.4fr .8fr;
   gap:18px;
 }
 
 .panel{
+  background:rgba(10,20,14,.82);
+  border:1px solid var(--line);
+  border-radius:17px;
+  overflow:hidden;
+}
+
+.panel-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  padding:19px 20px;
+  border-bottom:1px solid var(--line);
+}
+
+.panel-head h3{
+  margin:0;
+  font-family:"Space Grotesk",sans-serif;
+  font-size:16px;
+}
+
+.panel-body{
   padding:20px;
 }
 
-.panel-header{
+.recent-row{
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:17px;
-}
-
-.panel-title{
-  font-family:"Space Grotesk",sans-serif;
-  font-size:16px;
-  font-weight:700;
-}
-
-.activity{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-.activity-item{
-  display:flex;
   gap:12px;
-  align-items:center;
-  padding:12px;
-  border-radius:12px;
-  background:rgba(255,255,255,.025);
+  padding:12px 0;
+  border-bottom:1px solid var(--line);
 }
 
-.activity-icon{
-  width:35px;
-  height:35px;
-  display:grid;
-  place-items:center;
-  border-radius:10px;
-  background:rgba(54,212,119,.09);
+.recent-row:last-child{
+  border-bottom:0;
 }
 
-.activity-text{
-  flex:1;
+.recent-row img{
+  width:46px;
+  height:46px;
+  border-radius:9px;
+  object-fit:cover;
+  background:#101912;
+}
+
+.recent-row div{
   min-width:0;
+  flex:1;
 }
 
-.activity-main{
-  font-size:12px;
+.recent-row b{
+  display:block;
+  font-size:13px;
+}
+
+.recent-row small{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  margin-top:4px;
+}
+
+.quick-grid{
+  display:grid;
+  gap:10px;
+}
+
+.quick-btn{
+  width:100%;
+  text-align:left;
+  border:1px solid var(--line);
+  background:#09120d;
+  color:#d9e3dc;
+  border-radius:12px;
+  padding:14px;
   font-weight:600;
 }
 
-.activity-time{
-  font-size:10px;
-  color:var(--muted);
-  margin-top:3px;
+.quick-btn:hover{
+  border-color:rgba(101,229,138,.3);
+  background:#0d1911;
 }
 
-/* QUICK ACTIONS */
+/* =========================
+   TABLE
+========================= */
 
-.quick-actions{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
+.toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  margin-bottom:18px;
 }
 
-.action{
-  border:1px solid var(--border);
-  background:rgba(255,255,255,.025);
-  color:white;
-  padding:15px;
-  border-radius:13px;
-  text-align:left;
-  cursor:pointer;
-  transition:.2s;
+.toolbar h2{
+  margin:0;
+  font-family:"Space Grotesk",sans-serif;
 }
-
-.action:hover{
-  transform:translateY(-2px);
-  border-color:rgba(54,212,119,.35);
-  background:rgba(54,212,119,.07);
-}
-
-.action-icon{
-  font-size:20px;
-  margin-bottom:8px;
-}
-
-.action-title{
-  font-size:12px;
-  font-weight:700;
-}
-
-.action-desc{
-  font-size:10px;
-  color:var(--muted);
-  margin-top:3px;
-}
-
-/* TABLE */
 
 .table-wrap{
-  width:100%;
-  overflow-x:auto;
+  overflow:auto;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:rgba(10,19,13,.8);
 }
 
 table{
   width:100%;
+  min-width:850px;
   border-collapse:collapse;
-  min-width:650px;
-}
-
-th,td{
-  padding:14px 12px;
-  border-bottom:1px solid var(--border);
-  text-align:left;
-  font-size:12px;
 }
 
 th{
-  color:#83928a;
+  text-align:left;
+  padding:13px 15px;
+  color:#68766d;
+  background:#09110c;
   font-size:10px;
   text-transform:uppercase;
-  letter-spacing:1px;
+  letter-spacing:.08em;
+  white-space:nowrap;
 }
 
 td{
-  color:#dce5df;
+  padding:14px 15px;
+  border-top:1px solid var(--line);
+  font-size:12px;
+  vertical-align:middle;
 }
+
+td b{
+  font-size:13px;
+}
+
+.table-img{
+  width:50px;
+  height:50px;
+  border-radius:9px;
+  object-fit:cover;
+  background:#111a14;
+}
+
+.action-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+
+.mini-btn{
+  border:1px solid var(--line2);
+  background:#0c1710;
+  color:#c9d3cc;
+  border-radius:8px;
+  padding:7px 9px;
+  font-size:10px;
+  font-weight:700;
+}
+
+.mini-btn:hover{
+  border-color:rgba(101,229,138,.35);
+  color:#fff;
+}
+
+.mini-btn.danger{
+  color:#ff8989;
+  border-color:rgba(255,101,101,.2);
+}
+
+/* =========================
+   BADGES
+========================= */
 
 .badge{
   display:inline-flex;
-  padding:5px 9px;
-  border-radius:999px;
-  font-size:10px;
-  font-weight:700;
+  align-items:center;
+  gap:5px;
+  padding:5px 8px;
+  border-radius:99px;
+  font-size:9px;
+  font-weight:800;
+  text-transform:uppercase;
 }
 
-.badge.green{
-  background:rgba(54,212,119,.1);
-  color:#6bea9a;
+.badge.on{
+  color:#72ed97;
+  background:rgba(101,229,138,.1);
 }
 
-.badge.yellow{
-  background:rgba(255,191,85,.1);
-  color:#ffc96d;
+.badge.off{
+  color:#ff8585;
+  background:rgba(255,101,101,.09);
 }
 
-.badge.red{
-  background:rgba(255,93,105,.1);
-  color:#ff7b84;
-}
+/* =========================
+   SERVICES
+========================= */
 
-/* FORMS */
-
-.form-grid{
+.service-admin-grid{
   display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:16px;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
 }
 
-.field{
-  display:flex;
-  flex-direction:column;
-  gap:7px;
+.service-admin-card{
+  padding:20px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:rgba(10,20,14,.82);
 }
 
-.field.full{
+.service-admin-card small{
+  color:var(--green);
+  font-size:9px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+.service-admin-card h3{
+  margin:10px 0 8px;
+  font-family:"Space Grotesk",sans-serif;
+  font-size:17px;
+}
+
+.service-admin-card p{
+  margin:0;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.65;
+}
+
+/* =========================
+   COMPANY
+========================= */
+
+.company-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+
+.company-grid .full{
   grid-column:1/-1;
 }
 
-.field label{
-  color:#aebbb3;
-  font-size:11px;
-  font-weight:600;
+.form-card{
+  background:rgba(10,20,14,.82);
+  border:1px solid var(--line);
+  border-radius:17px;
+  padding:22px;
 }
 
-.field input,
-.field select,
-.field textarea{
-  width:100%;
-  border:1px solid var(--border);
-  background:#0a1510;
-  color:white;
-  border-radius:11px;
-  padding:12px;
-  outline:none;
+.form-card h3{
+  margin:0 0 18px;
+  font-family:"Space Grotesk",sans-serif;
+  font-size:17px;
 }
 
-.field textarea{
-  min-height:120px;
-  resize:vertical;
+.form-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
 }
 
-.field input:focus,
-.field select:focus,
-.field textarea:focus{
-  border-color:rgba(54,212,119,.55);
-  box-shadow:0 0 0 3px rgba(54,212,119,.07);
+.check-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:18px;
+  margin-top:5px;
 }
 
-.btn{
-  border:0;
-  border-radius:11px;
-  padding:11px 16px;
-  cursor:pointer;
-  font-weight:700;
+.check{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#cbd5ce;
   font-size:12px;
 }
 
-.btn-primary{
-  background:var(--green);
-  color:#061009;
+.check input{
+  accent-color:var(--green);
 }
 
-.btn-secondary{
-  background:rgba(255,255,255,.07);
-  color:white;
-  border:1px solid var(--border);
-}
-
-/* SETTINGS */
-
-.setting-list{
+.save-row{
   display:flex;
-  flex-direction:column;
-  gap:10px;
+  justify-content:flex-end;
+  margin-top:20px;
 }
 
-.setting{
+.save-row .btn{
+  width:auto;
+  min-width:160px;
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:2000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(8px);
+}
+
+.modal-card{
+  width:100%;
+  max-width:850px;
+  max-height:92vh;
+  overflow:auto;
+  background:#0a1510;
+  border:1px solid var(--line2);
+  border-radius:20px;
+  box-shadow:0 30px 100px rgba(0,0,0,.65);
+}
+
+.modal-head{
+  position:sticky;
+  top:0;
+  z-index:2;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:20px;
-  padding:15px;
-  border:1px solid var(--border);
-  background:rgba(255,255,255,.025);
-  border-radius:13px;
+  padding:19px 22px;
+  background:rgba(10,21,16,.96);
+  border-bottom:1px solid var(--line);
+  backdrop-filter:blur(15px);
 }
 
-.setting-name{
+.modal-head h2{
+  margin:0;
+  font-family:"Space Grotesk",sans-serif;
+  font-size:19px;
+}
+
+.modal-close{
+  width:38px;
+  height:38px;
+  border:1px solid var(--line2);
+  border-radius:10px;
+  background:#0c1710;
+  color:#fff;
+  font-size:20px;
+}
+
+.modal-body{
+  padding:22px;
+}
+
+.editor-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+
+.editor-grid .full{
+  grid-column:1/-1;
+}
+
+.image-preview{
+  width:100%;
+  height:210px;
+  border:1px dashed rgba(255,255,255,.16);
+  border-radius:14px;
+  background:#07100b center/cover no-repeat;
+  display:grid;
+  place-items:center;
+  color:#647168;
   font-size:12px;
+  overflow:hidden;
+  margin-bottom:10px;
+}
+
+.image-actions{
+  display:flex;
+  gap:8px;
+}
+
+.image-actions label,
+.image-actions button{
+  flex:1;
+}
+
+.file-btn,
+.clear-btn{
+  border:1px solid var(--line2);
+  background:#0c1710;
+  color:#ccd6ce;
+  border-radius:9px;
+  padding:10px;
+  text-align:center;
+  font-size:11px;
   font-weight:700;
 }
 
-.setting-desc{
-  color:var(--muted);
-  font-size:10px;
-  margin-top:3px;
+.clear-btn{
+  color:#ff8b8b;
 }
 
-.switch{
-  position:relative;
-  width:42px;
-  height:23px;
-  flex-shrink:0;
+.editor-footer{
+  position:sticky;
+  bottom:0;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  padding:16px 22px;
+  background:rgba(10,21,16,.96);
+  border-top:1px solid var(--line);
+  backdrop-filter:blur(15px);
 }
 
-.switch input{
-  display:none;
+.editor-footer .btn{
+  width:auto;
+  min-width:130px;
 }
 
-.slider{
-  position:absolute;
-  inset:0;
-  background:#26352d;
-  border-radius:20px;
-  cursor:pointer;
-  transition:.2s;
+.btn-secondary{
+  background:#111d16;
+  color:#d3ddd6;
+  border:1px solid var(--line2);
 }
 
-.slider:before{
-  content:"";
-  position:absolute;
-  width:17px;
-  height:17px;
-  left:3px;
-  top:3px;
-  background:white;
-  border-radius:50%;
-  transition:.2s;
-}
-
-.switch input:checked + .slider{
-  background:var(--green2);
-}
-
-.switch input:checked + .slider:before{
-  transform:translateX(19px);
-}
-
-/* MOBILE BACKDROP */
-
-.mobile-backdrop{
-  display:none;
-}
-
-/* TOAST */
-
-.toast{
-  position:fixed;
-  right:20px;
-  bottom:20px;
-  background:#13251a;
-  border:1px solid rgba(54,212,119,.3);
-  color:white;
-  padding:13px 17px;
-  border-radius:12px;
-  box-shadow:var(--shadow);
-  transform:translateY(100px);
-  opacity:0;
-  pointer-events:none;
-  transition:.25s;
-  z-index:3000;
+.editor-error{
+  margin-bottom:15px;
+  padding:11px 13px;
+  border-radius:10px;
+  background:rgba(255,101,101,.08);
+  border:1px solid rgba(255,101,101,.2);
+  color:#ff9999;
   font-size:12px;
 }
 
-.toast.show{
-  transform:translateY(0);
-  opacity:1;
+/* =========================
+   TOAST
+========================= */
+
+.admin-toast{
+  position:fixed;
+  z-index:5000;
+  right:22px;
+  bottom:22px;
+  max-width:360px;
+  padding:13px 16px;
+  background:#102118;
+  border:1px solid rgba(101,229,138,.25);
+  border-radius:11px;
+  color:#e8f5eb;
+  font-size:12px;
+  box-shadow:0 15px 40px rgba(0,0,0,.45);
+  animation:toastIn .25s ease;
 }
 
-/* MOBILE */
+@keyframes toastIn{
+  from{
+    opacity:0;
+    transform:translateY(12px);
+  }
+  to{
+    opacity:1;
+    transform:none;
+  }
+}
+
+/* =========================
+   MOBILE
+========================= */
 
 @media(max-width:1000px){
+
+  :root{
+    --sidebar:250px;
+  }
+
   .stat-grid{
     grid-template-columns:repeat(2,1fr);
   }
 
-  .grid-2{
+  .dashboard-grid{
     grid-template-columns:1fr;
+  }
+
+  .service-admin-grid{
+    grid-template-columns:repeat(2,1fr);
   }
 }
 
-@media(max-width:700px){
+@media(max-width:760px){
 
   .admin-sidebar{
+    width:min(88vw,310px);
     transform:translateX(-105%);
-    transition:.25s ease;
-    box-shadow:20px 0 50px rgba(0,0,0,.45);
+    transition:transform .28s ease;
+    box-shadow:30px 0 80px rgba(0,0,0,.55);
   }
 
   .admin-sidebar.open{
     transform:translateX(0);
   }
 
-  .mobile-backdrop{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.65);
-    backdrop-filter:blur(3px);
-    z-index:999;
+  .sidebar-close{
+    display:grid;
+    place-items:center;
+    position:absolute;
+    right:14px;
+    top:17px;
+    width:38px;
+    height:38px;
+    border:1px solid var(--line2);
+    border-radius:10px;
+    background:#0b1710;
+    color:#fff;
+    font-size:20px;
   }
 
-  .mobile-backdrop.active{
+  .sidebar-backdrop{
+    position:fixed;
+    inset:0;
+    z-index:900;
+    background:rgba(0,0,0,.6);
+    backdrop-filter:blur(3px);
+  }
+
+  .admin-sidebar.open ~ .sidebar-backdrop{
     display:block;
   }
 
@@ -711,819 +1060,1015 @@ td{
   }
 
   .admin-topbar{
-    padding:12px 14px;
+    height:68px;
+    padding:0 16px;
   }
 
   .mobile-menu{
-    display:block;
+    display:grid;
+    place-items:center;
+  }
+
+  .topbar-right{
+    display:none;
+  }
+
+  .admin-content{
+    padding:20px 15px 35px;
   }
 
   .topbar-title{
     font-size:18px;
   }
 
-  .topbar-subtitle{
-    display:none;
-  }
-
-  .live-pill{
-    display:none;
-  }
-
-  .content{
-    padding:18px 14px;
-  }
-
   .stat-grid{
-    grid-template-columns:1fr 1fr;
     gap:10px;
   }
 
   .stat-card{
-    padding:15px;
+    padding:16px;
+    min-height:115px;
   }
 
-  .stat-number{
+  .stat-value{
+    font-size:29px;
+  }
+
+  .section-heading h2{
     font-size:25px;
   }
 
-  .form-grid{
+  .toolbar{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .toolbar .btn{
+    width:100%;
+  }
+
+  .service-admin-grid{
     grid-template-columns:1fr;
   }
 
-  .field.full{
+  .company-grid{
+    grid-template-columns:1fr;
+  }
+
+  .company-grid .full{
     grid-column:auto;
   }
 
-  .quick-actions{
-    grid-template-columns:1fr 1fr;
+  .form-row,
+  .editor-grid{
+    grid-template-columns:1fr;
   }
 
-  .panel{
-    padding:15px;
+  .editor-grid .full{
+    grid-column:auto;
+  }
+
+  .modal{
+    padding:10px;
+  }
+
+  .modal-card{
+    max-height:96vh;
+    border-radius:16px;
+  }
+
+  .modal-body{
+    padding:17px;
+  }
+
+  .editor-footer{
+    padding:13px 17px;
+  }
+
+  .admin-toast{
+    left:15px;
+    right:15px;
+    bottom:15px;
+    max-width:none;
   }
 }
 
 @media(max-width:430px){
 
   .stat-grid{
-    grid-template-columns:1fr;
+    grid-template-columns:1fr 1fr;
   }
 
-  .quick-actions{
-    grid-template-columns:1fr;
+  .stat-card{
+    min-height:105px;
   }
 
-  .brand{
-    padding-top:35px;
+  .stat-label{
+    font-size:9px;
+  }
+
+  .stat-value{
+    font-size:26px;
+  }
+
+  .login-card{
+    padding:22px;
   }
 }
-</style></head><body class="admin-body"><div class="mobile-backdrop" id="backdrop" onclick="closeSidebar()"></div><div class="admin-shell">  <!-- SIDEBAR -->  <aside class="admin-sidebar" id="sidebar"><div class="brand">
-  <img src="../assets/images/vts-logo.jpg" alt="VTS Logo">
-  <div class="brand-text">
-    <div class="brand-title">VTS Management</div>
-    <div class="brand-subtitle">ENERGY & SECURITY</div>
-  </div>
-</div>
+</style>
+</head>
 
-<div class="nav-label">MAIN</div>
+<body>
 
-<nav class="nav">
+<!-- =========================
+     LOGIN
+========================= -->
 
-  <button class="active" onclick="showPage('dashboard',this)">
-    <span class="nav-icon">⌂</span>
-    Dashboard
-  </button>
+<div id="login-view">
 
-  <button onclick="showPage('customers',this)">
-    <span class="nav-icon">◉</span>
-    Customers
-  </button>
+  <div class="login-wrap">
 
-  <button onclick="showPage('projects',this)">
-    <span class="nav-icon">▣</span>
-    Projects
-  </button>
-
-  <button onclick="showPage('services',this)">
-    <span class="nav-icon">⚡</span>
-    Services
-  </button>
-
-  <button onclick="showPage('messages',this)">
-    <span class="nav-icon">✉</span>
-    Messages
-  </button>
-
-</nav>
-
-<div class="nav-label">SYSTEM</div>
-
-<nav class="nav">
-
-  <button onclick="showPage('settings',this)">
-    <span class="nav-icon">⚙</span>
-    Settings
-  </button>
-
-  <button onclick="showPage('security',this)">
-    <span class="nav-icon">🔒</span>
-    Security
-  </button>
-
-</nav>
-
-<div class="sidebar-bottom">
-
-  <div class="status-box">
-    <div class="status-row">
-      <span>System status</span>
-      <span class="status-dot"></span>
-    </div>
-    <div style="font-size:10px;color:var(--muted);margin-top:7px">
-      All systems operational
-    </div>
-  </div>
-
-  <button class="nav" style="width:100%;border:0;background:transparent;color:#aab7af;padding:12px;cursor:pointer;text-align:left;border-radius:12px" onclick="logout()">
-    ↪ &nbsp; Logout
-  </button>
-
-</div>
-
-  </aside>  <!-- MAIN -->  <main class="admin-main"><header class="admin-topbar">
-
-  <div style="display:flex;align-items:center;gap:12px">
-
-    <button class="mobile-menu" onclick="openSidebar()">☰</button>
-
-    <div>
-      <div class="topbar-title" id="pageTitle">Dashboard</div>
-      <div class="topbar-subtitle">
-        VTS Energy & Security Management Portal
-      </div>
+    <div class="login-brand">
+      <img src="../assets/images/vts-logo.jpg" alt="VTS Energy & Security">
+      <h1>VTS Energy & Security</h1>
+      <p>Secure Management Portal</p>
     </div>
 
-  </div>
+    <div class="login-card">
 
-  <div class="topbar-right">
-    <div class="live-pill">
-      <span class="status-dot"></span>
-      SYSTEM ONLINE
-    </div>
-  </div>
+      <h2>Administrator Login</h2>
+      <p class="login-sub">
+        Sign in to manage products, services and company information.
+      </p>
 
-</header>
+      <div id="login-error" class="login-error hidden"></div>
 
-<div class="content">
+      <form id="login-form">
 
-  <!-- DASHBOARD -->
-  <section class="page active" id="dashboard">
-
-    <div class="stat-grid">
-
-      <div class="card stat-card">
-        <div class="stat-icon">👥</div>
-        <div class="stat-number" id="customerCount">24</div>
-        <div class="stat-name">Total Customers</div>
-      </div>
-
-      <div class="card stat-card">
-        <div class="stat-icon">⚡</div>
-        <div class="stat-number" id="projectCount">12</div>
-        <div class="stat-name">Active Projects</div>
-      </div>
-
-      <div class="card stat-card">
-        <div class="stat-icon">✉</div>
-        <div class="stat-number" id="messageCount">7</div>
-        <div class="stat-name">New Messages</div>
-      </div>
-
-      <div class="card stat-card">
-        <div class="stat-icon">✓</div>
-        <div class="stat-number">99.9%</div>
-        <div class="stat-name">System Uptime</div>
-      </div>
-
-    </div>
-
-    <div class="grid-2">
-
-      <div class="card panel">
-
-        <div class="panel-header">
-          <div>
-            <div class="panel-title">Recent Activity</div>
-            <div class="section-subtitle" style="margin:4px 0 0">
-              Latest system activity
-            </div>
-          </div>
+        <div class="form-group">
+          <label for="login-password">Administrator Password</label>
+          <input
+            id="login-password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Enter your password"
+            required
+          >
         </div>
 
-        <div class="activity">
-
-          <div class="activity-item">
-            <div class="activity-icon">⚡</div>
-            <div class="activity-text">
-              <div class="activity-main">Solar installation project updated</div>
-              <div class="activity-time">Today · 10:42</div>
-            </div>
-            <span class="badge green">Active</span>
-          </div>
-
-          <div class="activity-item">
-            <div class="activity-icon">👤</div>
-            <div class="activity-text">
-              <div class="activity-main">New customer registered</div>
-              <div class="activity-time">Today · 09:18</div>
-            </div>
-            <span class="badge green">New</span>
-          </div>
-
-          <div class="activity-item">
-            <div class="activity-icon">✉</div>
-            <div class="activity-text">
-              <div class="activity-main">New contact enquiry received</div>
-              <div class="activity-time">Yesterday · 16:35</div>
-            </div>
-            <span class="badge yellow">Review</span>
-          </div>
-
-          <div class="activity-item">
-            <div class="activity-icon">🔒</div>
-            <div class="activity-text">
-              <div class="activity-main">Security audit completed</div>
-              <div class="activity-time">Yesterday · 12:10</div>
-            </div>
-            <span class="badge green">Complete</span>
-          </div>
-
-        </div>
-
-      </div>
-
-      <div class="card panel">
-
-        <div class="panel-header">
-          <div>
-            <div class="panel-title">Quick Actions</div>
-            <div class="section-subtitle" style="margin:4px 0 0">
-              Frequently used tools
-            </div>
-          </div>
-        </div>
-
-        <div class="quick-actions">
-
-          <button class="action" onclick="showPage('customers')">
-            <div class="action-icon">👤</div>
-            <div class="action-title">Customers</div>
-            <div class="action-desc">Manage customers</div>
-          </button>
-
-          <button class="action" onclick="showPage('projects')">
-            <div class="action-icon">📁</div>
-            <div class="action-title">Projects</div>
-            <div class="action-desc">View projects</div>
-          </button>
-
-          <button class="action" onclick="showPage('messages')">
-            <div class="action-icon">💬</div>
-            <div class="action-title">Messages</div>
-            <div class="action-desc">View enquiries</div>
-          </button>
-
-          <button class="action" onclick="showPage('settings')">
-            <div class="action-icon">⚙</div>
-            <div class="action-title">Settings</div>
-            <div class="action-desc">System settings</div>
-          </button>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- CUSTOMERS -->
-  <section class="page" id="customers">
-
-    <h2 class="section-title">Customers</h2>
-    <div class="section-subtitle">Manage VTS customers and accounts.</div>
-
-    <div class="card panel">
-
-      <div class="panel-header">
-        <div class="panel-title">Customer Directory</div>
-        <button class="btn btn-primary" onclick="notify('Customer form opened')">
-          + Add Customer
+        <button class="btn btn-primary" type="submit">
+          Sign In
         </button>
-      </div>
 
-      <div class="table-wrap">
-
-        <table>
-
-          <thead>
-            <tr>
-              <th>Customer</th>
-              <th>Contact</th>
-              <th>Service</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-
-          <tbody>
-
-            <tr>
-              <td>John Smith</td>
-              <td>john@example.com</td>
-              <td>Solar Installation</td>
-              <td><span class="badge green">Active</span></td>
-            </tr>
-
-            <tr>
-              <td>Sarah Jacobs</td>
-              <td>sarah@example.com</td>
-              <td>Security System</td>
-              <td><span class="badge green">Active</span></td>
-            </tr>
-
-            <tr>
-              <td>Mike Williams</td>
-              <td>mike@example.com</td>
-              <td>Electrical</td>
-              <td><span class="badge yellow">Pending</span></td>
-            </tr>
-
-          </tbody>
-
-        </table>
-
-      </div>
+      </form>
 
     </div>
 
-  </section>
-
-
-  <!-- PROJECTS -->
-  <section class="page" id="projects">
-
-    <h2 class="section-title">Projects</h2>
-    <div class="section-subtitle">Monitor current VTS Energy & Security projects.</div>
-
-    <div class="card panel">
-
-      <div class="table-wrap">
-
-        <table>
-
-          <thead>
-            <tr>
-              <th>Project</th>
-              <th>Customer</th>
-              <th>Type</th>
-              <th>Progress</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-
-          <tbody>
-
-            <tr>
-              <td>Solar Installation #001</td>
-              <td>John Smith</td>
-              <td>Solar</td>
-              <td>82%</td>
-              <td><span class="badge green">Active</span></td>
-            </tr>
-
-            <tr>
-              <td>Security Upgrade #014</td>
-              <td>Sarah Jacobs</td>
-              <td>Security</td>
-              <td>55%</td>
-              <td><span class="badge yellow">In Progress</span></td>
-            </tr>
-
-            <tr>
-              <td>Electrical Project #028</td>
-              <td>Mike Williams</td>
-              <td>Electrical</td>
-              <td>25%</td>
-              <td><span class="badge yellow">Pending</span></td>
-            </tr>
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- SERVICES -->
-  <section class="page" id="services">
-
-    <h2 class="section-title">Services</h2>
-    <div class="section-subtitle">VTS Energy & Security service management.</div>
-
-    <div class="grid-2">
-
-      <div class="card panel">
-
-        <div class="panel-title" style="margin-bottom:16px">
-          Energy Solutions
-        </div>
-
-        <div class="activity">
-
-          <div class="activity-item">
-            <div class="activity-icon">☀️</div>
-            <div class="activity-text">
-              <div class="activity-main">Solar Power Systems</div>
-              <div class="activity-time">Installations & maintenance</div>
-            </div>
-            <span class="badge green">Enabled</span>
-          </div>
-
-          <div class="activity-item">
-            <div class="activity-icon">🔋</div>
-            <div class="activity-text">
-              <div class="activity-main">Battery Backup</div>
-              <div class="activity-time">Energy storage solutions</div>
-            </div>
-            <span class="badge green">Enabled</span>
-          </div>
-
-          <div class="activity-item">
-            <div class="activity-icon">⚡</div>
-            <div class="activity-text">
-              <div class="activity-main">Electrical Solutions</div>
-              <div class="activity-time">Residential & commercial</div>
-            </div>
-            <span class="badge green">Enabled</span>
-          </div>
-
-        </div>
-
-      </div>
-
-      <div class="card panel">
-
-        <div class="panel-title" style="margin-bottom:16px">
-          Security Solutions
-        </div>
-
-        <div class="activity">
-
-          <div class="activity-item">
-            <div class="activity-icon">📹</div>
-            <div class="activity-text">
-              <div class="activity-main">CCTV Systems</div>
-              <div class="activity-time">Camera installation & monitoring</div>
-            </div>
-            <span class="badge green">Enabled</span>
-          </div>
-
-          <div class="activity-item">
-            <div class="activity-icon">🚨</div>
-            <div class="activity-text">
-              <div class="activity-main">Alarm Systems</div>
-              <div class="activity-time">Security alarm solutions</div>
-            </div>
-            <span class="badge green">Enabled</span>
-          </div>
-
-          <div class="activity-item">
-            <div class="activity-icon">🚪</div>
-            <div class="activity-text">
-              <div class="activity-main">Access Control</div>
-              <div class="activity-time">Smart access systems</div>
-            </div>
-            <span class="badge green">Enabled</span>
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- MESSAGES -->
-  <section class="page" id="messages">
-
-    <h2 class="section-title">Messages</h2>
-    <div class="section-subtitle">Customer enquiries and contact requests.</div>
-
-    <div class="card panel">
-
-      <div class="table-wrap">
-
-        <table>
-
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Subject</th>
-              <th>Date</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-
-          <tbody>
-
-            <tr>
-              <td>David Mokoena</td>
-              <td>david@example.com</td>
-              <td>Solar quotation</td>
-              <td>11 Sep 2026</td>
-              <td><span class="badge yellow">Unread</span></td>
-            </tr>
-
-            <tr>
-              <td>Lisa Botha</td>
-              <td>lisa@example.com</td>
-              <td>CCTV installation</td>
-              <td>10 Sep 2026</td>
-              <td><span class="badge green">Read</span></td>
-            </tr>
-
-            <tr>
-              <td>Andre Naidoo</td>
-              <td>andre@example.com</td>
-              <td>Battery backup</td>
-              <td>09 Sep 2026</td>
-              <td><span class="badge green">Read</span></td>
-            </tr>
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- SETTINGS -->
-  <section class="page" id="settings">
-
-    <h2 class="section-title">Settings</h2>
-    <div class="section-subtitle">Configure your VTS management portal.</div>
-
-    <div class="card panel">
-
-      <div class="setting-list">
-
-        <div class="setting">
-          <div>
-            <div class="setting-name">System Notifications</div>
-            <div class="setting-desc">Receive important system notifications.</div>
-          </div>
-
-          <label class="switch">
-            <input type="checkbox" checked onchange="notify('Notification setting updated')">
-            <span class="slider"></span>
-          </label>
-        </div>
-
-        <div class="setting">
-          <div>
-            <div class="setting-name">Security Monitoring</div>
-            <div class="setting-desc">Monitor security events and system activity.</div>
-          </div>
-
-          <label class="switch">
-            <input type="checkbox" checked onchange="notify('Security monitoring updated')">
-            <span class="slider"></span>
-          </label>
-        </div>
-
-        <div class="setting">
-          <div>
-            <div class="setting-name">Automatic Backups</div>
-            <div class="setting-desc">Keep regular backups of portal data.</div>
-          </div>
-
-          <label class="switch">
-            <input type="checkbox" checked onchange="notify('Backup setting updated')">
-            <span class="slider"></span>
-          </label>
-        </div>
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- SECURITY -->
-  <section class="page" id="security">
-
-    <h2 class="section-title">Security</h2>
-    <div class="section-subtitle">Portal security and administrator controls.</div>
-
-    <div class="grid-2">
-
-      <div class="card panel">
-
-        <div class="panel-title" style="margin-bottom:16px">
-          Security Status
-        </div>
-
-        <div class="activity">
-
-          <div class="activity-item">
-            <div class="activity-icon">🔐</div>
-            <div class="activity-text">
-              <div class="activity-main">Administrator Authentication</div>
-              <div class="activity-time">Protected</div>
-            </div>
-            <span class="badge green">Secure</span>
-          </div>
-
-          <div class="activity-item">
-            <div class="activity-icon">🛡️</div>
-            <div class="activity-text">
-              <div class="activity-main">HTTPS Connection</div>
-              <div class="activity-time">Encrypted connection</div>
-            </div>
-            <span class="badge green">Active</span>
-          </div>
-
-          <div class="activity-item">
-            <div class="activity-icon">✓</div>
-            <div class="activity-text">
-              <div class="activity-main">System Integrity</div>
-              <div class="activity-time">No issues detected</div>
-            </div>
-            <span class="badge green">Good</span>
-          </div>
-
-        </div>
-
-      </div>
-
-      <div class="card panel">
-
-        <div class="panel-title" style="margin-bottom:16px">
-          Administrator
-        </div>
-
-        <div class="form-grid">
-
-          <div class="field full">
-            <label>Administrator Name</label>
-            <input type="text" value="VTS Administrator">
-          </div>
-
-          <div class="field full">
-            <label>Email</label>
-            <input type="email" value="">
-          </div>
-
-          <div class="field">
-            <label>New Password</label>
-            <input type="password" placeholder="Enter new password">
-          </div>
-
-          <div class="field">
-            <label>Confirm Password</label>
-            <input type="password" placeholder="Confirm password">
-          </div>
-
-          <div class="field full">
-            <button class="btn btn-primary" onclick="notify('Administrator settings saved')">
-              Save Security Settings
-            </button>
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </section>
+  </div>
 
 </div>
 
-  </main></div><div class="toast" id="toast"></div><script>
 
-/* PAGE NAVIGATION */
+<!-- =========================
+     ADMIN APPLICATION
+========================= -->
 
-const titles = {
-  dashboard:"Dashboard",
-  customers:"Customers",
-  projects:"Projects",
-  services:"Services",
-  messages:"Messages",
-  settings:"Settings",
-  security:"Security"
-};
+<div id="app-view" class="hidden">
 
-function showPage(page, button){
+  <div class="admin-layout">
 
-  document.querySelectorAll(".page").forEach(function(item){
-    item.classList.remove("active");
-  });
+    <!-- SIDEBAR -->
 
-  const target = document.getElementById(page);
+    <aside class="admin-sidebar">
 
-  if(target){
-    target.classList.add("active");
+      <button
+        type="button"
+        class="sidebar-close"
+        id="sidebar-close"
+        aria-label="Close menu"
+      >×</button>
+
+      <div class="sidebar-brand">
+        <img src="../assets/images/vts-logo.jpg" alt="VTS">
+        <div>
+          <strong>VTS ENERGY</strong>
+          <span>Admin Portal</span>
+        </div>
+      </div>
+
+      <div class="sidebar-label">Management</div>
+
+      <nav>
+
+        <button type="button" data-section="dashboard" class="active">
+          <span class="nav-icon">⌂</span>
+          Dashboard
+        </button>
+
+        <button type="button" data-section="products">
+          <span class="nav-icon">▣</span>
+          Products
+        </button>
+
+        <button type="button" data-section="services">
+          <span class="nav-icon">⚡</span>
+          Services
+        </button>
+
+        <button type="button" data-section="company">
+          <span class="nav-icon">◆</span>
+          Company Information
+        </button>
+
+      </nav>
+
+      <div class="sidebar-bottom">
+
+        <div class="admin-user">
+          <small>Administrator</small>
+          <strong>VTS Management</strong>
+        </div>
+
+        <button type="button" class="logout-btn" id="logout">
+          Sign Out
+        </button>
+
+      </div>
+
+    </aside>
+
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+
+    <!-- MAIN -->
+
+    <div class="admin-main">
+
+      <header class="admin-topbar">
+
+        <div class="topbar-left">
+
+          <button
+            type="button"
+            class="mobile-menu"
+            id="mobile-menu"
+            aria-label="Open menu"
+          >☰</button>
+
+          <div class="topbar-title" id="section-title">
+            Dashboard
+          </div>
+
+        </div>
+
+        <div class="topbar-right">
+          VTS Energy & Security · Management Portal
+        </div>
+
+      </header>
+
+
+      <main class="admin-content">
+
+
+        <!-- =====================
+             DASHBOARD
+        ====================== -->
+
+        <section
+          id="section-dashboard"
+          class="admin-section"
+        >
+
+          <div class="section-heading">
+            <h2>Dashboard</h2>
+            <p>Overview of your VTS Energy & Security platform.</p>
+          </div>
+
+          <div class="stat-grid">
+
+            <div class="stat-card">
+              <span class="stat-label">Total Products</span>
+              <strong id="stat-products" class="stat-value">0</strong>
+            </div>
+
+            <div class="stat-card">
+              <span class="stat-label">Featured Products</span>
+              <strong id="stat-featured" class="stat-value stat-accent">0</strong>
+            </div>
+
+            <div class="stat-card">
+              <span class="stat-label">Energy Services</span>
+              <strong id="stat-energy" class="stat-value">0</strong>
+            </div>
+
+            <div class="stat-card">
+              <span class="stat-label">Security Services</span>
+              <strong id="stat-security" class="stat-value stat-accent">0</strong>
+            </div>
+
+          </div>
+
+
+          <div class="dashboard-grid">
+
+            <div class="panel">
+
+              <div class="panel-head">
+                <h3>Recent Products</h3>
+
+                <button
+                  type="button"
+                  class="mini-btn"
+                  data-go="products"
+                >
+                  Manage Products
+                </button>
+              </div>
+
+              <div
+                class="panel-body"
+                id="dashboard-recent"
+              >
+                <div class="recent-row">
+                  Loading...
+                </div>
+              </div>
+
+            </div>
+
+
+            <div class="panel">
+
+              <div class="panel-head">
+                <h3>Quick Actions</h3>
+              </div>
+
+              <div class="panel-body">
+
+                <div class="quick-grid">
+
+                  <button
+                    type="button"
+                    class="quick-btn"
+                    data-go="products"
+                  >
+                    📦 Manage Products
+                  </button>
+
+                  <button
+                    type="button"
+                    class="quick-btn"
+                    data-go="services"
+                  >
+                    ⚡ View Services
+                  </button>
+
+                  <button
+                    type="button"
+                    class="quick-btn"
+                    data-go="company"
+                  >
+                    🏢 Edit Company Information
+                  </button>
+
+                  <button
+                    type="button"
+                    class="quick-btn"
+                    id="quick-add-product"
+                  >
+                    ＋ Add New Product
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- =====================
+             PRODUCTS
+        ====================== -->
+
+        <section
+          id="section-products"
+          class="admin-section hidden"
+        >
+
+          <div class="toolbar">
+
+            <div>
+              <h2>Products</h2>
+              <p style="margin:6px 0 0;color:var(--muted);font-size:12px;">
+                Manage your product catalogue.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="add-product"
+            >
+              ＋ Add Product
+            </button>
+
+          </div>
+
+          <div class="table-wrap">
+
+            <table>
+
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th>Featured</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody id="product-table">
+                <tr>
+                  <td colspan="7">Loading products...</td>
+                </tr>
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </section>
+
+
+        <!-- =====================
+             SERVICES
+        ====================== -->
+
+        <section
+          id="section-services"
+          class="admin-section hidden"
+        >
+
+          <div class="section-heading">
+            <h2>Services</h2>
+            <p>Services currently available on the VTS website.</p>
+          </div>
+
+          <div
+            id="service-admin-grid"
+            class="service-admin-grid"
+          >
+            <article class="service-admin-card">
+              <p>Loading services...</p>
+            </article>
+          </div>
+
+        </section>
+
+
+        <!-- =====================
+             COMPANY
+        ====================== -->
+
+        <section
+          id="section-company"
+          class="admin-section hidden"
+        >
+
+          <div class="section-heading">
+            <h2>Company Information</h2>
+            <p>Update the information used throughout the VTS website.</p>
+          </div>
+
+          <form id="company-form">
+
+            <div class="company-grid">
+
+              <div class="form-card">
+
+                <h3>Business Details</h3>
+
+                <div class="form-group">
+                  <label>Company Name</label>
+                  <input
+                    name="company_name"
+                    type="text"
+                    placeholder="VTS Energy & Security"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label>Legal Name</label>
+                  <input
+                    name="legal_name"
+                    type="text"
+                    placeholder="Volt Tech Solutions (Pty) Ltd"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label>Registration Number</label>
+                  <input
+                    name="registration_number"
+                    type="text"
+                    placeholder="2023/259917/7"
+                  >
+                </div>
+
+              </div>
+
+
+              <div class="form-card">
+
+                <h3>Contact Details</h3>
+
+                <div class="form-group">
+                  <label>Primary Phone</label>
+                  <input
+                    name="phone"
+                    type="text"
+                    placeholder="+27 33 032 2153"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label>Secondary Phone</label>
+                  <input
+                    name="phone2"
+                    type="text"
+                    placeholder="+27 82 269 2150"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label>WhatsApp</label>
+                  <input
+                    name="whatsapp"
+                    type="text"
+                    placeholder="27822692150"
+                  >
+                </div>
+
+              </div>
+
+
+              <div class="form-card">
+
+                <h3>Email Addresses</h3>
+
+                <div class="form-group">
+                  <label>Sales Email</label>
+                  <input
+                    name="sales_email"
+                    type="email"
+                    placeholder="sales@vtsenergysecurity.co.za"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label>Information Email</label>
+                  <input
+                    name="info_email"
+                    type="email"
+                    placeholder="info@vtsenergysecurity.co.za"
+                  >
+                </div>
+
+              </div>
+
+
+              <div class="form-card">
+
+                <h3>Location</h3>
+
+                <div class="form-group">
+                  <label>Address</label>
+                  <textarea
+                    name="address"
+                    placeholder="18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa"
+                  ></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label>Coverage</label>
+                  <textarea
+                    name="coverage"
+                    placeholder="KwaZulu-Natal | Gauteng | Mpumalanga | Eastern Cape"
+                  ></textarea>
+                </div>
+
+              </div>
+
+
+              <div class="form-card full">
+
+                <h3>Mission, Vision & Values</h3>
+
+                <div class="form-group">
+                  <label>Mission</label>
+                  <textarea
+                    name="mission"
+                    placeholder="Our mission..."
+                  ></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label>Vision</label>
+                  <textarea
+                    name="vision"
+                    placeholder="Our vision..."
+                  ></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label>Values</label>
+                  <textarea
+                    name="values"
+                    placeholder="Integrity, reliability, innovation..."
+                  ></textarea>
+                </div>
+
+              </div>
+
+            </div>
+
+            <div class="save-row">
+
+              <button
+                type="button"
+                class="btn btn-primary"
+                id="save-company"
+              >
+                Save Company Information
+              </button>
+
+            </div>
+
+          </form>
+
+        </section>
+
+      </main>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     PRODUCT EDITOR
+========================= -->
+
+<div
+  id="product-editor"
+  class="modal hidden"
+  aria-hidden="true"
+>
+
+  <div class="modal-card">
+
+    <div class="modal-head">
+
+      <h2 id="editor-title">
+        Add Product
+      </h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        data-close-editor
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <form id="product-form">
+
+      <div class="modal-body">
+
+        <div
+          id="editor-error"
+          class="editor-error hidden"
+        ></div>
+
+        <input
+          type="hidden"
+          name="id"
+        >
+
+
+        <div class="editor-grid">
+
+
+          <div class="form-group">
+            <label>Product Name</label>
+            <input
+              name="name"
+              type="text"
+              required
+              placeholder="Product name"
+            >
+          </div>
+
+
+          <div class="form-group">
+            <label>Category</label>
+            <select name="category" id="product-category">
+              <option value="">Loading...</option>
+            </select>
+          </div>
+
+
+          <div class="form-group">
+
+            <label>Price</label>
+
+            <input
+              name="price"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+            >
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>Price Type</label>
+
+            <select name="price_type">
+
+              <option value="fixed">
+                Fixed Price
+              </option>
+
+              <option value="starting">
+                Starting From
+              </option>
+
+              <option value="quote">
+                Request a Quote
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group full">
+
+            <label>Short Description</label>
+
+            <input
+              name="short_description"
+              type="text"
+              placeholder="Short product description"
+            >
+
+          </div>
+
+
+          <div class="form-group full">
+
+            <label>Description</label>
+
+            <textarea
+              name="description"
+              placeholder="Full product description"
+            ></textarea>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>Specifications</label>
+
+            <textarea
+              name="specifications"
+              placeholder="One specification per line"
+            ></textarea>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>Features</label>
+
+            <textarea
+              name="features"
+              placeholder="One feature per line"
+            ></textarea>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>Display Order</label>
+
+            <input
+              name="display_order"
+              type="number"
+              value="0"
+              step="1"
+            >
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>Product Image</label>
+
+            <div
+              id="image-preview"
+              class="image-preview"
+            >
+              No image selected
+            </div>
+
+            <div class="image-actions">
+
+              <label class="file-btn">
+                Choose Image
+                <input
+                  id="product-image"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  hidden
+                >
+              </label>
+
+              <button
+                type="button"
+                class="clear-btn"
+                id="clear-image"
+              >
+                Clear Image
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>Options</label>
+
+            <div class="check-row">
+
+              <label class="check">
+                <input
+                  name="featured"
+                  type="checkbox"
+                >
+                Featured
+              </label>
+
+              <label class="check">
+                <input
+                  name="active"
+                  type="checkbox"
+                >
+                Active
+              </label>
+
+            </div>
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+      <div class="editor-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-close-editor
+        >
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn-primary"
+        >
+          Save Product
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<script>
+/*
+  Mobile sidebar controls.
+
+  These are intentionally kept separate from admin.js so
+  the navigation cannot interfere with Supabase logic.
+*/
+
+document.addEventListener("DOMContentLoaded",function(){
+
+  const sidebar=document.querySelector(".admin-sidebar");
+  const backdrop=document.querySelector("#sidebar-backdrop");
+  const close=document.querySelector("#sidebar-close");
+  const menu=document.querySelector("#mobile-menu");
+
+  function closeSidebar(){
+    sidebar?.classList.remove("open");
   }
 
-  document.querySelectorAll(".nav button").forEach(function(item){
-    item.classList.remove("active");
-  });
-
-  if(button){
-    button.classList.add("active");
+  function openSidebar(){
+    sidebar?.classList.add("open");
   }
 
-  document.getElementById("pageTitle").textContent =
-    titles[page] || "VTS Management Portal";
-
-  closeSidebar();
-
-  window.scrollTo({
-    top:0,
-    behavior:"smooth"
+  menu?.addEventListener("click",function(){
+    if(sidebar?.classList.contains("open")){
+      closeSidebar();
+    }else{
+      openSidebar();
+    }
   });
-}
 
-/* MOBILE SIDEBAR */
+  close?.addEventListener("click",closeSidebar);
+  backdrop?.addEventListener("click",closeSidebar);
 
-function openSidebar(){
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape"){
+      closeSidebar();
 
-  document.getElementById("sidebar").classList.add("open");
-  document.getElementById("backdrop").classList.add("active");
+      const editor=document.querySelector("#product-editor");
 
-}
+      if(editor && !editor.classList.contains("hidden")){
+        editor.classList.add("hidden");
+      }
+    }
+  });
 
-function closeSidebar(){
+  document.querySelectorAll(".admin-sidebar nav button").forEach(function(btn){
+    btn.addEventListener("click",closeSidebar);
+  });
 
-  document.getElementById("sidebar").classList.remove("open");
-  document.getElementById("backdrop").classList.remove("active");
+  document.querySelector("#quick-add-product")?.addEventListener("click",function(){
+    document.querySelector("#add-product")?.click();
+  });
 
-}
+  document.querySelectorAll("[data-close-editor]").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      document.querySelector("#product-editor")?.classList.add("hidden");
+    });
+  });
 
-/* TOAST */
+  document.querySelector("#product-editor")?.addEventListener("click",function(e){
+    if(e.target===this){
+      this.classList.add("hidden");
+    }
+  });
 
-function notify(message){
+});
+</script>
 
-  const toast = document.getElementById("toast");
 
-  toast.textContent = message;
-  toast.classList.add("show");
+<!--
+  IMPORTANT:
+  This page deliberately does NOT load public js/main.js
+  or public js/products.js.
 
-  clearTimeout(window.toastTimer);
+  Your admin JavaScript is expected to be:
+      admin/admin.js
 
-  window.toastTimer = setTimeout(function(){
-    toast.classList.remove("show");
-  },2500);
+  If your admin JS has a different filename, change ONLY
+  the script src on the next line.
+-->
+<script type="module" src="./admin.js"></script>
 
-}
-
-/* LOGOUT */
-
-function logout(){
-
-  if(confirm("Are you sure you want to log out?")){
-
-    notify("Logging out...");
-
-    setTimeout(function(){
-
-      /*
-       * If your project already has an authentication page,
-       * change this path to your real login page.
-       */
-
-      window.location.href="../index.html";
-
-    },800);
-
-  }
-
-}
-
-</script></body>
-         </html>
+</body>
+  </html>
