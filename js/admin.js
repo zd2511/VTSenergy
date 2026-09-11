@@ -1,7 +1,7 @@
-console.info('VTS admin.js loaded: v20260911-1719-product-debug');
-import { supabase } from './supabase.js?v20260911-1719-product-debug';
-import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1719-product-debug';
-import { ADMIN_EMAIL } from './config.js?v20260911-1719-product-debug';
+console.info('VTS admin.js loaded: v20260911-1740-management-timeout-fix');
+import { supabase } from './supabase.js?v20260911-1740-management-timeout-fix';
+import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1740-management-timeout-fix';
+import { ADMIN_EMAIL } from './config.js?v20260911-1740-management-timeout-fix';
 
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 let products=[], categories=[], settings;
@@ -145,7 +145,7 @@ async function loadData(){
   ];
   const results=await Promise.all(jobs.map(async ([name,fn])=>{
     try{
-      const r=await withTimeout(fn(),10000,`${name} request timed out.`);
+      const r=await withTimeout(fn(),30000,`${name} request timed out after 30 seconds. The Supabase project may be waking up, unreachable, or the request may be blocked by database/RLS configuration.`);
       return [name,r.data,r.error||null];
     }catch(e){return [name,null,e];}
   }));
@@ -165,7 +165,7 @@ async function loadData(){
   renderDashboard(serviceRows);renderProducts();renderServices(serviceRows);fillCompany();fillCategories();
   if(failures.length){
     console.warn('VTS management data warnings:',failures);
-    toast(`Some management data could not be loaded: ${failures[0]}`,'error');
+    toast(`Management data warning: ${failures[0]}`,'error');
   }
 }
 
