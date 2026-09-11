@@ -1,4 +1,4 @@
-import { getSettings, whatsappUrl, HOMEPAGE_COVERAGE, REQUIRED_PHONE, REQUIRED_PHONE2 } from './data.js';
+import { getSettings, whatsappUrl, HOMEPAGE_COVERAGE, REQUIRED_PHONE, REQUIRED_PHONE2 } from './data.js?v20260911-1530';
 
 const nav = document.querySelector('#site-nav');
 const footer = document.querySelector('#site-footer');
