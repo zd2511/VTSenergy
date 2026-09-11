@@ -4,7 +4,7 @@ import { ADMIN_EMAIL } from './config.js';
 
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 let products=[], categories=[], settings;
-let currentImagePath=null, newImageFile=null, productSaving=false, serviceRows=[];
+let currentImagePath=null, newImageFile=null, productSaving=false, serviceRows=[], editorSession=0;
 const imgFallback='../assets/images/vts-logo.jpg';
 function formatMoney(value){ if(value===null||value===undefined||value==='') return ''; const n=Number(value); return Number.isFinite(n)?`R${new Intl.NumberFormat('en-ZA',{maximumFractionDigits:2}).format(n)}`:String(value); }
 function hasPromotion(product){ return Boolean(product?.promotion_status && product.promotion_status!=='none' && product?.original_price!==null && product?.original_price!==undefined && product?.sale_price!==null && product?.sale_price!==undefined); }
@@ -152,7 +152,7 @@ function openEditor(p){
   setTimeout(()=>form.elements.name.focus(),0);
 }
 function arrayLines(v){if(!Array.isArray(v))return '';return v.map(x=>typeof x==='string'?x:(x?.label?`${x.label}: ${x.value||''}`:'')).join('\n')}
-function closeEditor(){if(productSaving)return;newImageFile=null;$('#product-image').value='';$('#product-editor').classList.add('hidden');$('#product-editor').setAttribute('aria-hidden','true')}
+function closeEditor(){editorSession++;productSaving=false;setSaving(false);newImageFile=null;$('#product-image').value='';$('#product-editor').classList.add('hidden');$('#product-editor').setAttribute('aria-hidden','true')}
 function clearImage(){newImageFile=null;$('#product-image').value='';currentImagePath=null;renderImagePreview(null)}
 function renderImagePreview(src){const el=$('#image-preview');if(src){el.style.backgroundImage=`url("${src}")`;el.textContent=''}else{el.style.backgroundImage='';el.textContent='No image selected'}}
 function previewImage(e){
@@ -176,9 +176,10 @@ function togglePromotionFields(){const enabled=$('#product-form')?.elements.prom
 async function saveProduct(e){
   e.preventDefault();
   if(productSaving)return;
-  const f=e.currentTarget;$('#editor-error').classList.add('hidden');
+  const f=e.currentTarget;
+  const session=editorSession;
+  $('#editor-error').classList.add('hidden');
   if(!f.reportValidity())return;
-  const submitter=e.submitter;
   try{
     setSaving(true);
     const name=f.elements.name.value.trim();
@@ -208,31 +209,48 @@ async function saveProduct(e){
     const specifications=parseLines(f.elements.specifications.value);
     if(features.length)data.features=features;
     if(specifications.length)data.specifications=specifications;
-
     if(newImageFile)data.image_url=await uploadImage(newImageFile);
+    if(session!==editorSession)return;
 
     const id=f.elements.id.value.trim();
     let res;
     if(id)res=await supabase.from('products').update(data).eq('id',id).select().single();
     else res=await supabase.from('products').insert(data).select().single();
+
+    // The promotion columns live in the supplied migration, but an existing
+    // Supabase project may still be using the older products table/schema cache.
+    // In that case, save the core product instead of leaving the editor stuck.
+    let promotionFallback=false;
+    if(res.error && /original_price|sale_price|promotion_status|promotion_type/i.test(res.error.message||'')){
+      const core={...data};
+      delete core.promotion_status; delete core.promotion_type; delete core.original_price; delete core.sale_price;
+      if(id)res=await supabase.from('products').update(core).eq('id',id).select().single();
+      else res=await supabase.from('products').insert(core).select().single();
+      promotionFallback=true;
+    }
     // Older V2 databases may not yet have the optional specifications column.
-    // Keep product saving reliable while the migration is being applied.
-    if(res.error && data.specifications && /specifications.*column|column.*specifications/i.test(res.error.message||'')){
+    if(res.error && /specifications.*column|column.*specifications/i.test(res.error.message||'')){
       const retry={...data};delete retry.specifications;
+      if(promotionFallback){delete retry.promotion_status;delete retry.promotion_type;delete retry.original_price;delete retry.sale_price;}
       if(id)res=await supabase.from('products').update(retry).eq('id',id).select().single();
       else res=await supabase.from('products').insert(retry).select().single();
     }
     if(res.error)throw new Error(res.error.message);
+    if(session!==editorSession)return;
     const saved=res.data;
     if(id)products=products.map(p=>p.id===id?saved:p);else products=[saved,...products];
     renderProducts();renderDashboard(serviceRows);
-    toast(`Product ${id?'updated':'added'} successfully.`);
+    if(promotionFallback){
+      toast('Product saved. Promotion pricing needs the Supabase promotion migration.','error');
+    }else{
+      toast(`Product ${id?'updated':'added'} successfully.`);
+    }
     closeEditor();
   }catch(err){
     console.error('Product save failed:',err);
-    editorError(`Save failed: ${err?.message||'An unexpected error occurred. Please try again.'}`);
+    if(session===editorSession)editorError(`Save failed: ${err?.message||'An unexpected error occurred. Please try again.'}`);
   }finally{
-    setSaving(false);
+    if(session===editorSession)setSaving(false);
   }
 }
 async function toggleProduct(id){const p=products.find(x=>x.id===id);if(!p)return;try{const {data,error:e}=await supabase.from('products').update({active:!p.active}).eq('id',id).select().single();if(e)throw e;products=products.map(x=>x.id===id?data:x);renderProducts();renderDashboard(serviceRows);toast(`Product ${!p.active?'activated':'deactivated'}.`)}catch(e){console.error(e);toast(`Could not update product: ${e.message||'Unknown error'}`,'error')}}

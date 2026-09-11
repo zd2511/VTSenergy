@@ -30,3 +30,9 @@ The public client configuration remains in `js/config.js`. No administrator pass
 - Admin login intentionally remains password-only in the UI and authenticates against the configured ADMIN_EMAIL via Supabase Auth.
 - Admin promotion helpers are self-contained and also exported from data.js to prevent module export mismatches.
 - Google Maps is displayed on both Contact and the homepage near the end of the page.
+
+## Existing Supabase database: promotion migration
+
+If the admin product editor reports an error such as `Could not find the 'original_price' column of 'products' in the schema cache`, the live Supabase project is still using the older products schema. Run `supabase/migration_promotions.sql` once in the Supabase SQL Editor. It adds the four promotion columns and asks PostgREST to reload its schema cache.
+
+The admin editor also contains a compatibility fallback: a normal product can still be saved against an older database, while promotion pricing waits for the migration. Once the migration is applied, On Sale and Special Offer data will be persisted normally.
