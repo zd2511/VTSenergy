@@ -1,7 +1,7 @@
-console.info('VTS admin.js loaded: v20260911-1648-stable');
-import { supabase } from './supabase.js?v20260911-1648-stable';
-import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1648-stable';
-import { ADMIN_EMAIL } from './config.js?v20260911-1648-stable';
+console.info('VTS admin.js loaded: v20260911-1650-stable');
+import { supabase } from './supabase.js?v20260911-1650-stable';
+import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1650-stable';
+import { ADMIN_EMAIL } from './config.js?v20260911-1650-stable';
 
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 let products=[], categories=[], settings;
