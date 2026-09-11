@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Replace https://vtsenergysecurity.co.za with the final production domain before launch if different. -->
-  <url><loc>https://vtsenergysecurity.co.za/</loc></url>
-  <url><loc>https://vtsenergysecurity.co.za/services.html</loc></url>
-  <url><loc>https://vtsenergysecurity.co.za/products.html</loc></url>
-  <url><loc>https://vtsenergysecurity.co.za/about.html</loc></url>
-  <url><loc>https://vtsenergysecurity.co.za/contact.html</loc></url>
+  <url><loc>https://YOUR-DOMAIN.example/</loc></url>
+  <url><loc>https://YOUR-DOMAIN.example/services.html</loc></url>
+  <url><loc>https://YOUR-DOMAIN.example/products.html</loc></url>
+  <url><loc>https://YOUR-DOMAIN.example/about.html</loc></url>
+  <url><loc>https://YOUR-DOMAIN.example/contact.html</loc></url>
 </urlset>

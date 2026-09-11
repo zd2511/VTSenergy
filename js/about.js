@@ -1,8 +1,2 @@
-import { REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1648-stable';
-
-function boot(){
-  document.querySelector('#mission-text').textContent=REQUIRED_MISSION;
-  document.querySelector('#vision-text').textContent=REQUIRED_VISION;
-  document.querySelector('#values-list').innerHTML=REQUIRED_VALUES.split('|').map(v=>`<div>${v.trim()}</div>`).join('');
-}
-boot();
+import { getSettings } from './data.js';
+async function boot(){try{const s=await getSettings();document.querySelector('#mission-text').textContent=s.mission;document.querySelector('#vision-text').textContent=s.vision;document.querySelector('#values-list').innerHTML=s.values.split('|').map(v=>`<div>${v.trim()}</div>`).join('')}catch(e){}}boot();
