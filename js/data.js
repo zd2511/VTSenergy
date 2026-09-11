@@ -1,25 +1,43 @@
 import { supabase } from './supabase.js';
 
+export const REQUIRED_PHONE = '+27 33 032 2153';
+export const REQUIRED_PHONE2 = '+27 82 269 2150';
+export const REQUIRED_WHATSAPP = '+27822692150';
+export const HOMEPAGE_COVERAGE = 'Zimbabwe, Zambia, Botswana, Namibia, Mozambique, Lesotho, Eswatini, and Malaw';
+export const REQUIRED_MISSION = 'To provide reliable, affordable, and professional energy and security solutions that keep African businesses and communities powered, protected, and productive.';
+export const REQUIRED_VISION = "To become Southern Africa's most trusted partner for integrated energy resilience and digital protection.";
+export const REQUIRED_VALUES = 'Reliability — We deliver what we promise, on time and to standard. | Trust — We build long-term relationships through honesty and transparency. | Excellence — We use quality products and certified professionals. | Innovation — We embrace modern technology to solve African challenges. | Safety — We protect people, property, and data at all times.';
+
 export const fallbackSettings = {
   company_name: 'VTS Energy & Security',
   legal_name: 'Volt Tech Solutions (Pty) Ltd',
   registration_number: '2023/259917/7',
-  phone: '+27 33 032 2153',
-  phone2: '+27 82 269 2150',
-  whatsapp: '+27822692150',
+  phone: REQUIRED_PHONE,
+  phone2: REQUIRED_PHONE2,
+  whatsapp: REQUIRED_WHATSAPP,
   sales_email: 'sales@vtsenergysecurity.co.za',
   info_email: 'info@vtsenergysecurity.co.za',
   address: '18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa',
   coverage: 'South Africa | Zimbabwe | Zambia | Botswana | Namibia | Mozambique | Lesotho | Eswatini | Malawi',
-  mission: 'To provide reliable, affordable, and professional energy and security solutions that keep African businesses and communities powered, protected, and productive.',
-  vision: "To become Southern Africa's most trusted partner for integrated energy resilience and digital protection.",
-  values: 'Reliability | Trust | Excellence | Innovation | Safety'
+  mission: REQUIRED_MISSION,
+  vision: REQUIRED_VISION,
+  values: REQUIRED_VALUES
 };
 
 export async function getSettings() {
   const { data, error } = await supabase.from('site_settings').select('*').eq('id', 1).maybeSingle();
   if (error) throw error;
-  return data || fallbackSettings;
+  // Public contact/content requirements are intentionally enforced here so a stale
+  // Supabase row cannot reintroduce retired contact details or older About copy.
+  return {
+    ...(data || fallbackSettings),
+    phone: REQUIRED_PHONE,
+    phone2: REQUIRED_PHONE2,
+    whatsapp: REQUIRED_WHATSAPP,
+    mission: REQUIRED_MISSION,
+    vision: REQUIRED_VISION,
+    values: REQUIRED_VALUES
+  };
 }
 
 export async function getPublicProducts() {

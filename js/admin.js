@@ -1,5 +1,5 @@
 import { supabase } from './supabase.js';
-import { formatPrice, slugify } from './data.js';
+import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js';
 import { ADMIN_EMAIL } from './config.js';
 
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
@@ -90,7 +90,17 @@ function renderProducts(){$('#product-table').innerHTML=products.map(p=>`<tr><td
 }
 function renderServices(rows){$('#service-admin-grid').innerHTML=rows.map(s=>`<article class="service-admin-card"><small>${esc(s.category)}</small><h3>${esc(s.name)}</h3><p>${esc(s.description)}</p></article>`).join('')}
 function fillCategories(){const select=$('#product-category');select.innerHTML=categories.map(c=>`<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('')}
-function fillCompany(){const f=$('#company-form');Object.entries(settings||{}).forEach(([k,v])=>{const el=f.elements[k];if(el)el.value=v??''})}
+function fillCompany(){
+  const f=$('#company-form');
+  Object.entries(settings||{}).forEach(([k,v])=>{const el=f.elements[k];if(el)el.value=v??''});
+  f.elements.phone.value=REQUIRED_PHONE;
+  f.elements.phone2.value=REQUIRED_PHONE2;
+  f.elements.whatsapp.value=REQUIRED_WHATSAPP;
+  f.elements.coverage.value=HOMEPAGE_COVERAGE;
+  f.elements.mission.value=REQUIRED_MISSION;
+  f.elements.vision.value=REQUIRED_VISION;
+  f.elements.values.value=REQUIRED_VALUES;
+}
 function openEditor(p){
   const form=$('#product-form');form.reset();$('#editor-error').classList.add('hidden');newImageFile=null;currentImagePath=p?.image_url||null;$('#product-image').value='';
   fillCategories();
@@ -179,7 +189,7 @@ async function deleteProduct(id){const p=products.find(x=>x.id===id);if(!p||!con
 async function saveCompany(){
   const f=$('#company-form');
   if(!f.reportValidity())return;
-  const row={company_name:f.elements.company_name.value.trim(),legal_name:f.elements.legal_name.value.trim(),registration_number:f.elements.registration_number.value.trim(),phone:f.elements.phone.value.trim(),phone2:f.elements.phone2.value.trim(),whatsapp:f.elements.whatsapp.value.trim(),sales_email:f.elements.sales_email.value.trim(),info_email:f.elements.info_email.value.trim(),address:f.elements.address.value.trim(),coverage:f.elements.coverage.value.trim(),mission:f.elements.mission.value.trim(),vision:f.elements.vision.value.trim(),values:f.elements.values.value.trim()};
+  const row={company_name:f.elements.company_name.value.trim(),legal_name:f.elements.legal_name.value.trim(),registration_number:f.elements.registration_number.value.trim(),phone:REQUIRED_PHONE,phone2:REQUIRED_PHONE2,whatsapp:REQUIRED_WHATSAPP,sales_email:f.elements.sales_email.value.trim(),info_email:f.elements.info_email.value.trim(),address:f.elements.address.value.trim(),coverage:HOMEPAGE_COVERAGE,mission:REQUIRED_MISSION,vision:REQUIRED_VISION,values:REQUIRED_VALUES};
   try{const {error:e}=await supabase.from('site_settings').update(row).eq('id',1);if(e)throw e;settings={...settings,...row};toast('Company information saved.')}catch(e){console.error(e);toast(`Failed to save company information: ${e.message||'Unknown error'}`,'error')}
 }
 boot();

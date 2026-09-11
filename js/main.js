@@ -1,4 +1,4 @@
-import { getSettings, whatsappUrl } from './data.js';
+import { getSettings, whatsappUrl, HOMEPAGE_COVERAGE, REQUIRED_PHONE, REQUIRED_PHONE2 } from './data.js';
 
 const nav = document.querySelector('#site-nav');
 const footer = document.querySelector('#site-footer');
@@ -24,9 +24,12 @@ async function boot(){
     document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
   }
   try{settings=await getSettings()}catch(e){settings=undefined;toast('Live company data could not be loaded. Check Supabase configuration.','error')}
-  if(footer) footer.innerHTML=footerMarkup(settings||{phone:'+27 33 032 2153',phone2:'+27 82 269 2150',sales_email:'sales@vtsenergysecurity.co.za',info_email:'info@vtsenergysecurity.co.za',address:'18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa',legal_name:'Volt Tech Solutions (Pty) Ltd',registration_number:'2023/259917/7'});
+  if(footer) footer.innerHTML=footerMarkup(settings||{phone:REQUIRED_PHONE,phone2:REQUIRED_PHONE2,sales_email:'sales@vtsenergysecurity.co.za',info_email:'info@vtsenergysecurity.co.za',address:'18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa',legal_name:'Volt Tech Solutions (Pty) Ltd',registration_number:'2023/259917/7'});
   const coverage=document.querySelectorAll('#coverage-list');
-  if(settings?.coverage) coverage.forEach(el=>el.innerHTML=settings.coverage.split('|').map(x=>`<span>${x.trim()}</span>`).join(''));
+  if(settings?.coverage) coverage.forEach(el=>{
+    const value=page==='home' ? HOMEPAGE_COVERAGE : settings.coverage;
+    el.innerHTML=value.split('|').map(x=>`<span>${x.trim()}</span>`).join('');
+  });
   const homeWa=document.querySelector('#home-wa'); if(homeWa) homeWa.href=whatsappUrl(settings?.whatsapp);
 }
 boot();
