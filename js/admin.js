@@ -20,10 +20,24 @@ function setSaving(state){
   if(button){button.disabled=state;button.setAttribute('aria-busy',String(state));button.textContent=state?'Saving…':'Save Product'}
 }
 function withTimeout(promise,ms,label){return Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label)),ms))])}
-async function isAdmin(){
-  const {data,error}=await withTimeout(supabase.rpc('is_admin'),10000,'Administrator check timed out. Please check Supabase connectivity and the is_admin function.');
-  if(error) throw new Error(`Administrator check failed: ${error.message||'The is_admin function is unavailable.'}`);
-  return data===true;
+async function isAdmin(userId=null){
+  // Verify the currently authenticated user directly against admin_users.
+  // This intentionally avoids making the login depend on the is_admin() RPC,
+  // because a broken/stale RPC can otherwise leave the password login stuck.
+  let id=userId;
+  if(!id){
+    const {data,error}=await withTimeout(supabase.auth.getUser(),10000,'Administrator session check timed out. Please check your Supabase configuration.');
+    if(error) throw new Error(`Administrator session check failed: ${error.message||'Unable to read the authenticated user.'}`);
+    id=data?.user?.id||null;
+  }
+  if(!id)return false;
+  const {data,error}=await withTimeout(
+    supabase.from('admin_users').select('user_id').eq('user_id',id).maybeSingle(),
+    10000,
+    'Administrator check timed out. Please check Supabase connectivity and the admin_users table.'
+  );
+  if(error) throw new Error(`Administrator check failed: ${error.message||'Unable to verify administrator access.'}`);
+  return data?.user_id===id;
 }
 
 function setLoginBusy(state){
@@ -53,7 +67,7 @@ async function boot(){
   try{
     const {data:{session}}=await withTimeout(supabase.auth.getSession(),10000,'Administrator session check timed out. Please check your internet connection and Supabase configuration.');
     if(session){
-      try{ if(await isAdmin()) showApp(); else { await supabase.auth.signOut(); showLogin(); } }
+      try{ if(await isAdmin(session?.user?.id)) showApp(); else { await supabase.auth.signOut(); showLogin(); } }
       catch(err){ console.error(err); showLogin(); error(err.message); }
     }else showLogin();
   }catch(err){
@@ -65,7 +79,7 @@ async function boot(){
     if(!s){ if(!authBusy) showLogin(); return; }
     if(authBusy) return;
     try{
-      if(await isAdmin()) showApp();
+      if(await isAdmin(s?.user?.id)) showApp();
       else { await withTimeout(supabase.auth.signOut(),10000,'Sign-out timed out.'); showLogin(); error('This account is authenticated but is not registered as a VTS administrator.'); }
     }catch(err){console.error(err);showLogin();error(err.message||'Administrator verification failed.');}
   });
@@ -95,7 +109,7 @@ async function login(e){
     setLoginBusy(true);
     const result=await withTimeout(supabase.auth.signInWithPassword({email:ADMIN_EMAIL,password}),12000,'Sign-in timed out. Please check your internet connection and Supabase configuration.');
     if(result.error)throw new Error(result.error.message);
-    const admin=await isAdmin();
+    const admin=await isAdmin(result.data?.user?.id);
     if(!admin){await withTimeout(supabase.auth.signOut(),10000,'Sign-out timed out.');throw new Error('User is authenticated but is not registered as a VTS administrator.');}
     showApp();
   }catch(err){console.error('Admin login failed:',err);error(`Login failed: ${err?.message||'Unable to sign in. Please check the password and Supabase configuration.'}`);}
