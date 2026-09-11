@@ -1,150 +1,1529 @@
 <!doctype html>
+
 <html lang="en-ZA">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VTS Management Portal</title>
-<meta name="robots" content="noindex,nofollow">
-
-<link rel="icon" href="../assets/images/vts-logo.jpg">
-
-<link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/admin.css">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>VTS Management Portal</title>
+<meta name="robots" content="noindex,nofollow"><link rel="icon" href="../assets/images/vts-logo.jpg"><link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-
-<style>
-/* =========================================================
-   VTS ADMIN MOBILE / RESPONSIVE OVERHAUL
-   ========================================================= */
-
-* {
-  box-sizing: border-box;
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"><style>
+:root{
+  --bg:#07100b;
+  --bg2:#0b1710;
+  --panel:#101d15;
+  --panel2:#13251a;
+  --border:rgba(255,255,255,.09);
+  --text:#f4f8f5;
+  --muted:#91a198;
+  --green:#36d477;
+  --green2:#19a95a;
+  --danger:#ff5d69;
+  --warning:#ffbf55;
+  --shadow:0 20px 60px rgba(0,0,0,.35);
 }
 
-html,
-body {
-  margin: 0;
-  width: 100%;
-  min-height: 100%;
+*{
+  box-sizing:border-box;
 }
 
-body.admin-body {
-  overflow-x: hidden;
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  min-height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Inter,Arial,sans-serif;
 }
 
-/* Mobile menu button */
-.mobile-menu {
-  display: none;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(7,16,11,.88);
-  color: #fff;
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-  font-size: 24px;
-  line-height: 1;
-  cursor: pointer;
-  flex-shrink: 0;
+body{
+  overflow-x:hidden;
 }
 
-/* Sidebar close button */
-.sidebar-close {
-  display: none;
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 42px;
-  height: 42px;
-  border: 1px solid rgba(255,255,255,.14);
-  border-radius: 50%;
-  background: rgba(255,255,255,.06);
-  color: #fff;
-  font-size: 28px;
-  line-height: 38px;
-  text-align: center;
-  cursor: pointer;
-  z-index: 20;
+button{
+  font:inherit;
 }
 
-/* Mobile backdrop */
-.admin-mobile-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.58);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
-  z-index: 999;
+a{
+  color:inherit;
+  text-decoration:none;
 }
 
-.admin-mobile-backdrop.active {
-  display: block;
+/* BACKGROUND */
+
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 10% 10%,rgba(54,212,119,.10),transparent 30%),
+    radial-gradient(circle at 90% 80%,rgba(54,212,119,.07),transparent 30%);
+  z-index:0;
 }
 
-/* Make sure sidebar sits above backdrop */
-.admin-sidebar {
-  z-index: 1000;
+/* LAYOUT */
+
+.admin-shell{
+  position:relative;
+  z-index:1;
+  display:flex;
+  min-height:100vh;
 }
 
-/* =========================================================
-   TABLET
-   ========================================================= */
+/* SIDEBAR */
 
-@media (max-width: 900px) {
+.admin-sidebar{
+  width:270px;
+  min-width:270px;
+  min-height:100vh;
+  position:fixed;
+  left:0;
+  top:0;
+  bottom:0;
+  padding:22px 16px;
+  background:rgba(7,16,11,.97);
+  border-right:1px solid var(--border);
+  z-index:1000;
+  display:flex;
+  flex-direction:column;
+}
 
-  .admin-main {
-    width: 100%;
-    min-width: 0;
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:8px 10px 25px;
+}
+
+.brand img{
+  width:46px;
+  height:46px;
+  border-radius:12px;
+  object-fit:cover;
+  border:1px solid rgba(255,255,255,.12);
+}
+
+.brand-text{
+  min-width:0;
+}
+
+.brand-title{
+  font-family:"Space Grotesk",sans-serif;
+  font-weight:700;
+  font-size:17px;
+}
+
+.brand-subtitle{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:3px;
+}
+
+.nav-label{
+  color:#68786f;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:1.5px;
+  padding:14px 12px 8px;
+}
+
+.nav{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+
+.nav button{
+  width:100%;
+  border:0;
+  background:transparent;
+  color:#aab7af;
+  border-radius:12px;
+  padding:12px 13px;
+  text-align:left;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  transition:.2s ease;
+}
+
+.nav button:hover{
+  background:rgba(255,255,255,.05);
+  color:white;
+}
+
+.nav button.active{
+  background:rgba(54,212,119,.12);
+  color:#69e798;
+  box-shadow:inset 3px 0 0 var(--green);
+}
+
+.nav-icon{
+  width:24px;
+  text-align:center;
+  font-size:17px;
+}
+
+.sidebar-bottom{
+  margin-top:auto;
+}
+
+.status-box{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.025);
+  border-radius:14px;
+  padding:13px;
+  margin:10px 0;
+}
+
+.status-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:12px;
+}
+
+.status-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 12px var(--green);
+}
+
+/* MAIN */
+
+.admin-main{
+  width:calc(100% - 270px);
+  margin-left:270px;
+  min-height:100vh;
+}
+
+/* TOPBAR */
+
+.admin-topbar{
+  min-height:78px;
+  padding:16px 28px;
+  border-bottom:1px solid var(--border);
+  background:rgba(7,16,11,.78);
+  backdrop-filter:blur(18px);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  position:sticky;
+  top:0;
+  z-index:900;
+}
+
+.topbar-title{
+  font-family:"Space Grotesk",sans-serif;
+  font-size:22px;
+  font-weight:700;
+}
+
+.topbar-subtitle{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:3px;
+}
+
+.topbar-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.live-pill{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  border:1px solid rgba(54,212,119,.22);
+  background:rgba(54,212,119,.08);
+  color:#6bea9a;
+  padding:8px 11px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:700;
+}
+
+.mobile-menu{
+  display:none;
+  width:44px;
+  height:44px;
+  border:1px solid var(--border);
+  background:var(--panel);
+  color:white;
+  border-radius:12px;
+  cursor:pointer;
+  font-size:21px;
+}
+
+/* CONTENT */
+
+.content{
+  padding:28px;
+  max-width:1500px;
+  margin:auto;
+}
+
+.page{
+  display:none;
+}
+
+.page.active{
+  display:block;
+}
+
+/* CARDS */
+
+.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+  margin-bottom:22px;
+}
+
+.card{
+  background:linear-gradient(145deg,rgba(19,37,26,.95),rgba(10,23,15,.95));
+  border:1px solid var(--border);
+  border-radius:18px;
+  box-shadow:var(--shadow);
+}
+
+.stat-card{
+  padding:20px;
+  position:relative;
+  overflow:hidden;
+}
+
+.stat-card:after{
+  content:"";
+  position:absolute;
+  width:100px;
+  height:100px;
+  right:-40px;
+  bottom:-40px;
+  background:rgba(54,212,119,.08);
+  border-radius:50%;
+}
+
+.stat-icon{
+  font-size:23px;
+  margin-bottom:15px;
+}
+
+.stat-number{
+  font-family:"Space Grotesk",sans-serif;
+  font-size:31px;
+  font-weight:700;
+}
+
+.stat-name{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:5px;
+}
+
+/* DASHBOARD */
+
+.section-title{
+  font-family:"Space Grotesk",sans-serif;
+  font-size:18px;
+  margin:0 0 5px;
+}
+
+.section-subtitle{
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:18px;
+}
+
+.grid-2{
+  display:grid;
+  grid-template-columns:1.4fr 1fr;
+  gap:18px;
+}
+
+.panel{
+  padding:20px;
+}
+
+.panel-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:17px;
+}
+
+.panel-title{
+  font-family:"Space Grotesk",sans-serif;
+  font-size:16px;
+  font-weight:700;
+}
+
+.activity{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.activity-item{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  padding:12px;
+  border-radius:12px;
+  background:rgba(255,255,255,.025);
+}
+
+.activity-icon{
+  width:35px;
+  height:35px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  background:rgba(54,212,119,.09);
+}
+
+.activity-text{
+  flex:1;
+  min-width:0;
+}
+
+.activity-main{
+  font-size:12px;
+  font-weight:600;
+}
+
+.activity-time{
+  font-size:10px;
+  color:var(--muted);
+  margin-top:3px;
+}
+
+/* QUICK ACTIONS */
+
+.quick-actions{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+
+.action{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.025);
+  color:white;
+  padding:15px;
+  border-radius:13px;
+  text-align:left;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.action:hover{
+  transform:translateY(-2px);
+  border-color:rgba(54,212,119,.35);
+  background:rgba(54,212,119,.07);
+}
+
+.action-icon{
+  font-size:20px;
+  margin-bottom:8px;
+}
+
+.action-title{
+  font-size:12px;
+  font-weight:700;
+}
+
+.action-desc{
+  font-size:10px;
+  color:var(--muted);
+  margin-top:3px;
+}
+
+/* TABLE */
+
+.table-wrap{
+  width:100%;
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:650px;
+}
+
+th,td{
+  padding:14px 12px;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+  font-size:12px;
+}
+
+th{
+  color:#83928a;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+
+td{
+  color:#dce5df;
+}
+
+.badge{
+  display:inline-flex;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:700;
+}
+
+.badge.green{
+  background:rgba(54,212,119,.1);
+  color:#6bea9a;
+}
+
+.badge.yellow{
+  background:rgba(255,191,85,.1);
+  color:#ffc96d;
+}
+
+.badge.red{
+  background:rgba(255,93,105,.1);
+  color:#ff7b84;
+}
+
+/* FORMS */
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+.field.full{
+  grid-column:1/-1;
+}
+
+.field label{
+  color:#aebbb3;
+  font-size:11px;
+  font-weight:600;
+}
+
+.field input,
+.field select,
+.field textarea{
+  width:100%;
+  border:1px solid var(--border);
+  background:#0a1510;
+  color:white;
+  border-radius:11px;
+  padding:12px;
+  outline:none;
+}
+
+.field textarea{
+  min-height:120px;
+  resize:vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus{
+  border-color:rgba(54,212,119,.55);
+  box-shadow:0 0 0 3px rgba(54,212,119,.07);
+}
+
+.btn{
+  border:0;
+  border-radius:11px;
+  padding:11px 16px;
+  cursor:pointer;
+  font-weight:700;
+  font-size:12px;
+}
+
+.btn-primary{
+  background:var(--green);
+  color:#061009;
+}
+
+.btn-secondary{
+  background:rgba(255,255,255,.07);
+  color:white;
+  border:1px solid var(--border);
+}
+
+/* SETTINGS */
+
+.setting-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.setting{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  padding:15px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.025);
+  border-radius:13px;
+}
+
+.setting-name{
+  font-size:12px;
+  font-weight:700;
+}
+
+.setting-desc{
+  color:var(--muted);
+  font-size:10px;
+  margin-top:3px;
+}
+
+.switch{
+  position:relative;
+  width:42px;
+  height:23px;
+  flex-shrink:0;
+}
+
+.switch input{
+  display:none;
+}
+
+.slider{
+  position:absolute;
+  inset:0;
+  background:#26352d;
+  border-radius:20px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.slider:before{
+  content:"";
+  position:absolute;
+  width:17px;
+  height:17px;
+  left:3px;
+  top:3px;
+  background:white;
+  border-radius:50%;
+  transition:.2s;
+}
+
+.switch input:checked + .slider{
+  background:var(--green2);
+}
+
+.switch input:checked + .slider:before{
+  transform:translateX(19px);
+}
+
+/* MOBILE BACKDROP */
+
+.mobile-backdrop{
+  display:none;
+}
+
+/* TOAST */
+
+.toast{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  background:#13251a;
+  border:1px solid rgba(54,212,119,.3);
+  color:white;
+  padding:13px 17px;
+  border-radius:12px;
+  box-shadow:var(--shadow);
+  transform:translateY(100px);
+  opacity:0;
+  pointer-events:none;
+  transition:.25s;
+  z-index:3000;
+  font-size:12px;
+}
+
+.toast.show{
+  transform:translateY(0);
+  opacity:1;
+}
+
+/* MOBILE */
+
+@media(max-width:1000px){
+  .stat-grid{
+    grid-template-columns:repeat(2,1fr);
   }
 
-  .admin-topbar {
-    gap: 14px;
-  }
-
-  .stat-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .admin-form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-form-grid .span-2 {
-    grid-column: auto;
-  }
-
-  .settings-cards {
-    grid-template-columns: 1fr;
+  .grid-2{
+    grid-template-columns:1fr;
   }
 }
 
-/* =========================================================
-   MOBILE
-   ========================================================= */
+@media(max-width:700px){
 
-@media (max-width: 700px) {
-
-  body.admin-body {
-    min-width: 0;
-    overflow-x: hidden;
+  .admin-sidebar{
+    transform:translateX(-105%);
+    transition:.25s ease;
+    box-shadow:20px 0 50px rgba(0,0,0,.45);
   }
 
-  /* Mobile topbar */
-  .admin-topbar {
-    position: sticky;
-    top: 0;
-    z-index: 900;
-    min-height: 74px;
-    width: 100%;
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  .admin-sidebar.open{
+    transform:translateX(0);
   }
 
-  .mobile-menu {
-    display: flex !
+  .mobile-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.65);
+    backdrop-filter:blur(3px);
+    z-index:999;
+  }
+
+  .mobile-backdrop.active{
+    display:block;
+  }
+
+  .admin-main{
+    width:100%;
+    margin-left:0;
+  }
+
+  .admin-topbar{
+    padding:12px 14px;
+  }
+
+  .mobile-menu{
+    display:block;
+  }
+
+  .topbar-title{
+    font-size:18px;
+  }
+
+  .topbar-subtitle{
+    display:none;
+  }
+
+  .live-pill{
+    display:none;
+  }
+
+  .content{
+    padding:18px 14px;
+  }
+
+  .stat-grid{
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  .stat-card{
+    padding:15px;
+  }
+
+  .stat-number{
+    font-size:25px;
+  }
+
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .field.full{
+    grid-column:auto;
+  }
+
+  .quick-actions{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .panel{
+    padding:15px;
+  }
+}
+
+@media(max-width:430px){
+
+  .stat-grid{
+    grid-template-columns:1fr;
+  }
+
+  .quick-actions{
+    grid-template-columns:1fr;
+  }
+
+  .brand{
+    padding-top:35px;
+  }
+}
+</style></head><body class="admin-body"><div class="mobile-backdrop" id="backdrop" onclick="closeSidebar()"></div><div class="admin-shell">  <!-- SIDEBAR -->  <aside class="admin-sidebar" id="sidebar"><div class="brand">
+  <img src="../assets/images/vts-logo.jpg" alt="VTS Logo">
+  <div class="brand-text">
+    <div class="brand-title">VTS Management</div>
+    <div class="brand-subtitle">ENERGY & SECURITY</div>
+  </div>
+</div>
+
+<div class="nav-label">MAIN</div>
+
+<nav class="nav">
+
+  <button class="active" onclick="showPage('dashboard',this)">
+    <span class="nav-icon">⌂</span>
+    Dashboard
+  </button>
+
+  <button onclick="showPage('customers',this)">
+    <span class="nav-icon">◉</span>
+    Customers
+  </button>
+
+  <button onclick="showPage('projects',this)">
+    <span class="nav-icon">▣</span>
+    Projects
+  </button>
+
+  <button onclick="showPage('services',this)">
+    <span class="nav-icon">⚡</span>
+    Services
+  </button>
+
+  <button onclick="showPage('messages',this)">
+    <span class="nav-icon">✉</span>
+    Messages
+  </button>
+
+</nav>
+
+<div class="nav-label">SYSTEM</div>
+
+<nav class="nav">
+
+  <button onclick="showPage('settings',this)">
+    <span class="nav-icon">⚙</span>
+    Settings
+  </button>
+
+  <button onclick="showPage('security',this)">
+    <span class="nav-icon">🔒</span>
+    Security
+  </button>
+
+</nav>
+
+<div class="sidebar-bottom">
+
+  <div class="status-box">
+    <div class="status-row">
+      <span>System status</span>
+      <span class="status-dot"></span>
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-top:7px">
+      All systems operational
+    </div>
+  </div>
+
+  <button class="nav" style="width:100%;border:0;background:transparent;color:#aab7af;padding:12px;cursor:pointer;text-align:left;border-radius:12px" onclick="logout()">
+    ↪ &nbsp; Logout
+  </button>
+
+</div>
+
+  </aside>  <!-- MAIN -->  <main class="admin-main"><header class="admin-topbar">
+
+  <div style="display:flex;align-items:center;gap:12px">
+
+    <button class="mobile-menu" onclick="openSidebar()">☰</button>
+
+    <div>
+      <div class="topbar-title" id="pageTitle">Dashboard</div>
+      <div class="topbar-subtitle">
+        VTS Energy & Security Management Portal
+      </div>
+    </div>
+
+  </div>
+
+  <div class="topbar-right">
+    <div class="live-pill">
+      <span class="status-dot"></span>
+      SYSTEM ONLINE
+    </div>
+  </div>
+
+</header>
+
+<div class="content">
+
+  <!-- DASHBOARD -->
+  <section class="page active" id="dashboard">
+
+    <div class="stat-grid">
+
+      <div class="card stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-number" id="customerCount">24</div>
+        <div class="stat-name">Total Customers</div>
+      </div>
+
+      <div class="card stat-card">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-number" id="projectCount">12</div>
+        <div class="stat-name">Active Projects</div>
+      </div>
+
+      <div class="card stat-card">
+        <div class="stat-icon">✉</div>
+        <div class="stat-number" id="messageCount">7</div>
+        <div class="stat-name">New Messages</div>
+      </div>
+
+      <div class="card stat-card">
+        <div class="stat-icon">✓</div>
+        <div class="stat-number">99.9%</div>
+        <div class="stat-name">System Uptime</div>
+      </div>
+
+    </div>
+
+    <div class="grid-2">
+
+      <div class="card panel">
+
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Recent Activity</div>
+            <div class="section-subtitle" style="margin:4px 0 0">
+              Latest system activity
+            </div>
+          </div>
+        </div>
+
+        <div class="activity">
+
+          <div class="activity-item">
+            <div class="activity-icon">⚡</div>
+            <div class="activity-text">
+              <div class="activity-main">Solar installation project updated</div>
+              <div class="activity-time">Today · 10:42</div>
+            </div>
+            <span class="badge green">Active</span>
+          </div>
+
+          <div class="activity-item">
+            <div class="activity-icon">👤</div>
+            <div class="activity-text">
+              <div class="activity-main">New customer registered</div>
+              <div class="activity-time">Today · 09:18</div>
+            </div>
+            <span class="badge green">New</span>
+          </div>
+
+          <div class="activity-item">
+            <div class="activity-icon">✉</div>
+            <div class="activity-text">
+              <div class="activity-main">New contact enquiry received</div>
+              <div class="activity-time">Yesterday · 16:35</div>
+            </div>
+            <span class="badge yellow">Review</span>
+          </div>
+
+          <div class="activity-item">
+            <div class="activity-icon">🔒</div>
+            <div class="activity-text">
+              <div class="activity-main">Security audit completed</div>
+              <div class="activity-time">Yesterday · 12:10</div>
+            </div>
+            <span class="badge green">Complete</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="card panel">
+
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Quick Actions</div>
+            <div class="section-subtitle" style="margin:4px 0 0">
+              Frequently used tools
+            </div>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+
+          <button class="action" onclick="showPage('customers')">
+            <div class="action-icon">👤</div>
+            <div class="action-title">Customers</div>
+            <div class="action-desc">Manage customers</div>
+          </button>
+
+          <button class="action" onclick="showPage('projects')">
+            <div class="action-icon">📁</div>
+            <div class="action-title">Projects</div>
+            <div class="action-desc">View projects</div>
+          </button>
+
+          <button class="action" onclick="showPage('messages')">
+            <div class="action-icon">💬</div>
+            <div class="action-title">Messages</div>
+            <div class="action-desc">View enquiries</div>
+          </button>
+
+          <button class="action" onclick="showPage('settings')">
+            <div class="action-icon">⚙</div>
+            <div class="action-title">Settings</div>
+            <div class="action-desc">System settings</div>
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- CUSTOMERS -->
+  <section class="page" id="customers">
+
+    <h2 class="section-title">Customers</h2>
+    <div class="section-subtitle">Manage VTS customers and accounts.</div>
+
+    <div class="card panel">
+
+      <div class="panel-header">
+        <div class="panel-title">Customer Directory</div>
+        <button class="btn btn-primary" onclick="notify('Customer form opened')">
+          + Add Customer
+        </button>
+      </div>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Contact</th>
+              <th>Service</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr>
+              <td>John Smith</td>
+              <td>john@example.com</td>
+              <td>Solar Installation</td>
+              <td><span class="badge green">Active</span></td>
+            </tr>
+
+            <tr>
+              <td>Sarah Jacobs</td>
+              <td>sarah@example.com</td>
+              <td>Security System</td>
+              <td><span class="badge green">Active</span></td>
+            </tr>
+
+            <tr>
+              <td>Mike Williams</td>
+              <td>mike@example.com</td>
+              <td>Electrical</td>
+              <td><span class="badge yellow">Pending</span></td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- PROJECTS -->
+  <section class="page" id="projects">
+
+    <h2 class="section-title">Projects</h2>
+    <div class="section-subtitle">Monitor current VTS Energy & Security projects.</div>
+
+    <div class="card panel">
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Project</th>
+              <th>Customer</th>
+              <th>Type</th>
+              <th>Progress</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr>
+              <td>Solar Installation #001</td>
+              <td>John Smith</td>
+              <td>Solar</td>
+              <td>82%</td>
+              <td><span class="badge green">Active</span></td>
+            </tr>
+
+            <tr>
+              <td>Security Upgrade #014</td>
+              <td>Sarah Jacobs</td>
+              <td>Security</td>
+              <td>55%</td>
+              <td><span class="badge yellow">In Progress</span></td>
+            </tr>
+
+            <tr>
+              <td>Electrical Project #028</td>
+              <td>Mike Williams</td>
+              <td>Electrical</td>
+              <td>25%</td>
+              <td><span class="badge yellow">Pending</span></td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- SERVICES -->
+  <section class="page" id="services">
+
+    <h2 class="section-title">Services</h2>
+    <div class="section-subtitle">VTS Energy & Security service management.</div>
+
+    <div class="grid-2">
+
+      <div class="card panel">
+
+        <div class="panel-title" style="margin-bottom:16px">
+          Energy Solutions
+        </div>
+
+        <div class="activity">
+
+          <div class="activity-item">
+            <div class="activity-icon">☀️</div>
+            <div class="activity-text">
+              <div class="activity-main">Solar Power Systems</div>
+              <div class="activity-time">Installations & maintenance</div>
+            </div>
+            <span class="badge green">Enabled</span>
+          </div>
+
+          <div class="activity-item">
+            <div class="activity-icon">🔋</div>
+            <div class="activity-text">
+              <div class="activity-main">Battery Backup</div>
+              <div class="activity-time">Energy storage solutions</div>
+            </div>
+            <span class="badge green">Enabled</span>
+          </div>
+
+          <div class="activity-item">
+            <div class="activity-icon">⚡</div>
+            <div class="activity-text">
+              <div class="activity-main">Electrical Solutions</div>
+              <div class="activity-time">Residential & commercial</div>
+            </div>
+            <span class="badge green">Enabled</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="card panel">
+
+        <div class="panel-title" style="margin-bottom:16px">
+          Security Solutions
+        </div>
+
+        <div class="activity">
+
+          <div class="activity-item">
+            <div class="activity-icon">📹</div>
+            <div class="activity-text">
+              <div class="activity-main">CCTV Systems</div>
+              <div class="activity-time">Camera installation & monitoring</div>
+            </div>
+            <span class="badge green">Enabled</span>
+          </div>
+
+          <div class="activity-item">
+            <div class="activity-icon">🚨</div>
+            <div class="activity-text">
+              <div class="activity-main">Alarm Systems</div>
+              <div class="activity-time">Security alarm solutions</div>
+            </div>
+            <span class="badge green">Enabled</span>
+          </div>
+
+          <div class="activity-item">
+            <div class="activity-icon">🚪</div>
+            <div class="activity-text">
+              <div class="activity-main">Access Control</div>
+              <div class="activity-time">Smart access systems</div>
+            </div>
+            <span class="badge green">Enabled</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- MESSAGES -->
+  <section class="page" id="messages">
+
+    <h2 class="section-title">Messages</h2>
+    <div class="section-subtitle">Customer enquiries and contact requests.</div>
+
+    <div class="card panel">
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Subject</th>
+              <th>Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr>
+              <td>David Mokoena</td>
+              <td>david@example.com</td>
+              <td>Solar quotation</td>
+              <td>11 Sep 2026</td>
+              <td><span class="badge yellow">Unread</span></td>
+            </tr>
+
+            <tr>
+              <td>Lisa Botha</td>
+              <td>lisa@example.com</td>
+              <td>CCTV installation</td>
+              <td>10 Sep 2026</td>
+              <td><span class="badge green">Read</span></td>
+            </tr>
+
+            <tr>
+              <td>Andre Naidoo</td>
+              <td>andre@example.com</td>
+              <td>Battery backup</td>
+              <td>09 Sep 2026</td>
+              <td><span class="badge green">Read</span></td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- SETTINGS -->
+  <section class="page" id="settings">
+
+    <h2 class="section-title">Settings</h2>
+    <div class="section-subtitle">Configure your VTS management portal.</div>
+
+    <div class="card panel">
+
+      <div class="setting-list">
+
+        <div class="setting">
+          <div>
+            <div class="setting-name">System Notifications</div>
+            <div class="setting-desc">Receive important system notifications.</div>
+          </div>
+
+          <label class="switch">
+            <input type="checkbox" checked onchange="notify('Notification setting updated')">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting">
+          <div>
+            <div class="setting-name">Security Monitoring</div>
+            <div class="setting-desc">Monitor security events and system activity.</div>
+          </div>
+
+          <label class="switch">
+            <input type="checkbox" checked onchange="notify('Security monitoring updated')">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting">
+          <div>
+            <div class="setting-name">Automatic Backups</div>
+            <div class="setting-desc">Keep regular backups of portal data.</div>
+          </div>
+
+          <label class="switch">
+            <input type="checkbox" checked onchange="notify('Backup setting updated')">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- SECURITY -->
+  <section class="page" id="security">
+
+    <h2 class="section-title">Security</h2>
+    <div class="section-subtitle">Portal security and administrator controls.</div>
+
+    <div class="grid-2">
+
+      <div class="card panel">
+
+        <div class="panel-title" style="margin-bottom:16px">
+          Security Status
+        </div>
+
+        <div class="activity">
+
+          <div class="activity-item">
+            <div class="activity-icon">🔐</div>
+            <div class="activity-text">
+              <div class="activity-main">Administrator Authentication</div>
+              <div class="activity-time">Protected</div>
+            </div>
+            <span class="badge green">Secure</span>
+          </div>
+
+          <div class="activity-item">
+            <div class="activity-icon">🛡️</div>
+            <div class="activity-text">
+              <div class="activity-main">HTTPS Connection</div>
+              <div class="activity-time">Encrypted connection</div>
+            </div>
+            <span class="badge green">Active</span>
+          </div>
+
+          <div class="activity-item">
+            <div class="activity-icon">✓</div>
+            <div class="activity-text">
+              <div class="activity-main">System Integrity</div>
+              <div class="activity-time">No issues detected</div>
+            </div>
+            <span class="badge green">Good</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="card panel">
+
+        <div class="panel-title" style="margin-bottom:16px">
+          Administrator
+        </div>
+
+        <div class="form-grid">
+
+          <div class="field full">
+            <label>Administrator Name</label>
+            <input type="text" value="VTS Administrator">
+          </div>
+
+          <div class="field full">
+            <label>Email</label>
+            <input type="email" value="">
+          </div>
+
+          <div class="field">
+            <label>New Password</label>
+            <input type="password" placeholder="Enter new password">
+          </div>
+
+          <div class="field">
+            <label>Confirm Password</label>
+            <input type="password" placeholder="Confirm password">
+          </div>
+
+          <div class="field full">
+            <button class="btn btn-primary" onclick="notify('Administrator settings saved')">
+              Save Security Settings
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+  </main></div><div class="toast" id="toast"></div><script>
+
+/* PAGE NAVIGATION */
+
+const titles = {
+  dashboard:"Dashboard",
+  customers:"Customers",
+  projects:"Projects",
+  services:"Services",
+  messages:"Messages",
+  settings:"Settings",
+  security:"Security"
+};
+
+function showPage(page, button){
+
+  document.querySelectorAll(".page").forEach(function(item){
+    item.classList.remove("active");
+  });
+
+  const target = document.getElementById(page);
+
+  if(target){
+    target.classList.add("active");
+  }
+
+  document.querySelectorAll(".nav button").forEach(function(item){
+    item.classList.remove("active");
+  });
+
+  if(button){
+    button.classList.add("active");
+  }
+
+  document.getElementById("pageTitle").textContent =
+    titles[page] || "VTS Management Portal";
+
+  closeSidebar();
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+}
+
+/* MOBILE SIDEBAR */
+
+function openSidebar(){
+
+  document.getElementById("sidebar").classList.add("open");
+  document.getElementById("backdrop").classList.add("active");
+
+}
+
+function closeSidebar(){
+
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("backdrop").classList.remove("active");
+
+}
+
+/* TOAST */
+
+function notify(message){
+
+  const toast = document.getElementById("toast");
+
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  clearTimeout(window.toastTimer);
+
+  window.toastTimer = setTimeout(function(){
+    toast.classList.remove("show");
+  },2500);
+
+}
+
+/* LOGOUT */
+
+function logout(){
+
+  if(confirm("Are you sure you want to log out?")){
+
+    notify("Logging out...");
+
+    setTimeout(function(){
+
+      /*
+       * If your project already has an authentication page,
+       * change this path to your real login page.
+       */
+
+      window.location.href="../index.html";
+
+    },800);
+
+  }
+
+}
+
+</script></body>
+         </html>
