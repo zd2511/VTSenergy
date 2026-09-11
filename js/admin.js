@@ -1,7 +1,7 @@
-console.info('VTS admin.js loaded: v20260911-1600');
-import { supabase } from './supabase.js?v20260911-1600';
-import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1600';
-import { ADMIN_EMAIL } from './config.js?v20260911-1600';
+console.info('VTS admin.js loaded: v20260911-1530-fixed');
+import { supabase } from './supabase.js?v20260911-1530-fixed';
+import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1530-fixed';
+import { ADMIN_EMAIL } from './config.js?v20260911-1530-fixed';
 
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 let products=[], categories=[], settings;
@@ -21,23 +21,6 @@ function setSaving(state){
   if(button){button.disabled=state;button.setAttribute('aria-busy',String(state));button.textContent=state?'Saving…':'Save Product'}
 }
 function withTimeout(promise,ms,label){return Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label)),ms))])}
-async function isAdmin(user=null){
-  // The admin login is intentionally password-only in the UI. The email is
-  // fixed to ADMIN_EMAIL, so Supabase Auth is the credential check; do not
-  // make login depend on a second admin_users/RPC request that can stall.
-  let currentUser=user;
-  if(!currentUser){
-    const {data,error}=await withTimeout(
-      supabase.auth.getUser(),
-      10000,
-      'Administrator session check timed out. Please check your Supabase configuration.'
-    );
-    if(error) throw new Error(`Administrator session check failed: ${error.message||'Unable to read the authenticated user.'}`);
-    currentUser=data?.user||null;
-  }
-  return String(currentUser?.email||'').trim().toLowerCase()===String(ADMIN_EMAIL||'').trim().toLowerCase();
-}
-
 function setLoginBusy(state){
   const button=$('#login-submit');
   if(!button)return;
@@ -99,8 +82,12 @@ async function login(e){
     setLoginBusy(true);
     const result=await withTimeout(supabase.auth.signInWithPassword({email:ADMIN_EMAIL,password}),12000,'Sign-in timed out. Please check your internet connection and Supabase configuration.');
     if(result.error)throw new Error(result.error.message);
-    const admin=await isAdmin(result.data?.user);
-    if(!admin){await withTimeout(supabase.auth.signOut(),10000,'Sign-out timed out.');throw new Error('User is authenticated but is not registered as a VTS administrator.');}
+    const user=result.data?.user;
+    if(!user) throw new Error('Supabase authenticated the request but returned no user session.');
+    if(String(user.email||'').trim().toLowerCase()!==String(ADMIN_EMAIL||'').trim().toLowerCase()){
+      await withTimeout(supabase.auth.signOut(),10000,'Sign-out timed out.');
+      throw new Error('This account is not the configured VTS administrator account.');
+    }
     showApp();
   }catch(err){console.error('Admin login failed:',err);error(`Login failed: ${err?.message||'Unable to sign in. Please check the password and Supabase configuration.'}`);}
   finally{authBusy=false;setLoginBusy(false);}
