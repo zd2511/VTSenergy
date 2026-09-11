@@ -95,18 +95,18 @@ create policy admin_users_select on public.admin_users for select to authenticat
 drop policy if exists settings_public_read on public.site_settings;
 create policy settings_public_read on public.site_settings for select to anon,authenticated using(true);
 
-drop policy if exists settings_admin_write on public.site_settings;
-create policy settings_admin_write on public.site_settings for update to authenticated using(public.is_admin());
+drop policy if exists settings_admin_update on public.site_settings;
+create policy settings_admin_update on public.site_settings for update to authenticated using(public.is_admin()) with check(public.is_admin());
 
 -- RLS Policies for categories
 drop policy if exists categories_public_read on public.categories;
 create policy categories_public_read on public.categories for select to anon,authenticated using(active=true or public.is_admin());
 
 drop policy if exists categories_admin_insert on public.categories;
-create policy categories_admin_insert on public.categories for insert to authenticated using(public.is_admin());
+create policy categories_admin_insert on public.categories for insert to authenticated with check(public.is_admin());
 
 drop policy if exists categories_admin_update on public.categories;
-create policy categories_admin_update on public.categories for update to authenticated using(public.is_admin());
+create policy categories_admin_update on public.categories for update to authenticated using(public.is_admin()) with check(public.is_admin());
 
 drop policy if exists categories_admin_delete on public.categories;
 create policy categories_admin_delete on public.categories for delete to authenticated using(public.is_admin());
@@ -116,10 +116,10 @@ drop policy if exists products_public_read on public.products;
 create policy products_public_read on public.products for select to anon,authenticated using(active=true or public.is_admin());
 
 drop policy if exists products_admin_insert on public.products;
-create policy products_admin_insert on public.products for insert to authenticated using(public.is_admin());
+create policy products_admin_insert on public.products for insert to authenticated with check(public.is_admin());
 
 drop policy if exists products_admin_update on public.products;
-create policy products_admin_update on public.products for update to authenticated using(public.is_admin());
+create policy products_admin_update on public.products for update to authenticated using(public.is_admin()) with check(public.is_admin());
 
 drop policy if exists products_admin_delete on public.products;
 create policy products_admin_delete on public.products for delete to authenticated using(public.is_admin());
@@ -129,10 +129,10 @@ drop policy if exists services_public_read on public.services;
 create policy services_public_read on public.services for select to anon,authenticated using(active=true or public.is_admin());
 
 drop policy if exists services_admin_insert on public.services;
-create policy services_admin_insert on public.services for insert to authenticated using(public.is_admin());
+create policy services_admin_insert on public.services for insert to authenticated with check(public.is_admin());
 
 drop policy if exists services_admin_update on public.services;
-create policy services_admin_update on public.services for update to authenticated using(public.is_admin());
+create policy services_admin_update on public.services for update to authenticated using(public.is_admin()) with check(public.is_admin());
 
 drop policy if exists services_admin_delete on public.services;
 create policy services_admin_delete on public.services for delete to authenticated using(public.is_admin());
@@ -143,8 +143,8 @@ insert into storage.buckets(id,name,public) values('product-images','product-ima
 drop policy if exists product_images_public_read on storage.objects;
 create policy product_images_public_read on storage.objects for select to public using(bucket_id='product-images');
 
-drop policy if exists product_images_authenticated_write on storage.objects;
-create policy product_images_authenticated_write on storage.objects for insert to authenticated using(bucket_id='product-images' and public.is_admin());
+drop policy if exists product_images_authenticated_insert on storage.objects;
+create policy product_images_authenticated_insert on storage.objects for insert to authenticated with check(bucket_id='product-images' and public.is_admin());
 
 drop policy if exists product_images_authenticated_delete on storage.objects;
 create policy product_images_authenticated_delete on storage.objects for delete to authenticated using(bucket_id='product-images' and public.is_admin());
