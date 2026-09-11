@@ -25,9 +25,9 @@ drop policy if exists product_images_authenticated_write on storage.objects;
 drop policy if exists product_images_admin_insert on storage.objects;
 drop policy if exists product_images_admin_update on storage.objects;
 drop policy if exists product_images_admin_delete on storage.objects;
-create policy product_images_admin_insert on storage.objects for insert to authenticated with check(bucket_id='product-images' and public.is_admin());
-create policy product_images_admin_update on storage.objects for update to authenticated using(bucket_id='product-images' and public.is_admin()) with check(bucket_id='product-images' and public.is_admin());
-create policy product_images_admin_delete on storage.objects for delete to authenticated using(bucket_id='product-images' and public.is_admin());
+create policy product_images_admin_insert on storage.objects for insert to authenticated with check(bucket_id='product-images' and lower(coalesce(auth.jwt()->>'email','')) = 'zapifydesigns@gmail.com');
+create policy product_images_admin_update on storage.objects for update to authenticated using(bucket_id='product-images' and lower(coalesce(auth.jwt()->>'email','')) = 'zapifydesigns@gmail.com') with check(bucket_id='product-images' and lower(coalesce(auth.jwt()->>'email','')) = 'zapifydesigns@gmail.com');
+create policy product_images_admin_delete on storage.objects for delete to authenticated using(bucket_id='product-images' and lower(coalesce(auth.jwt()->>'email','')) = 'zapifydesigns@gmail.com');
 
 notify pgrst, 'reload schema';
 

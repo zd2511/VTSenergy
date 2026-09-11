@@ -155,10 +155,10 @@ drop policy if exists product_images_public_read on storage.objects;
 create policy product_images_public_read on storage.objects for select to public using(bucket_id='product-images');
 
 drop policy if exists product_images_authenticated_insert on storage.objects;
-create policy product_images_authenticated_insert on storage.objects for insert to authenticated with check(bucket_id='product-images' and public.is_admin());
+create policy product_images_authenticated_insert on storage.objects for insert to authenticated with check(bucket_id='product-images' and lower(coalesce(auth.jwt()->>'email','')) = 'zapifydesigns@gmail.com');
 
 drop policy if exists product_images_authenticated_delete on storage.objects;
-create policy product_images_authenticated_delete on storage.objects for delete to authenticated using(bucket_id='product-images' and public.is_admin());
+create policy product_images_authenticated_delete on storage.objects for delete to authenticated using(bucket_id='product-images' and lower(coalesce(auth.jwt()->>'email','')) = 'zapifydesigns@gmail.com');
 
 -- Seed data
 insert into public.site_settings(id,company_name,legal_name,registration_number,phone,phone2,whatsapp,sales_email,info_email,address,coverage,mission,vision,values) 

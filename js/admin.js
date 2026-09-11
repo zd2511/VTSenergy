@@ -1,7 +1,7 @@
-console.info('VTS admin.js loaded: v20260911-1638-category-fixed');
-import { supabase } from './supabase.js?v20260911-1638-category-fixed';
-import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1638-category-fixed';
-import { ADMIN_EMAIL } from './config.js?v20260911-1638-category-fixed';
+console.info('VTS admin.js loaded: v20260911-1645-image-upload-fixed');
+import { supabase } from './supabase.js?v20260911-1645-image-upload-fixed';
+import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1645-image-upload-fixed';
+import { ADMIN_EMAIL } from './config.js?v20260911-1645-image-upload-fixed';
 
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 let products=[], categories=[], settings;
@@ -171,7 +171,7 @@ async function uploadImage(file){
   let ext=file.type==='image/jpeg'?'jpg':file.type.split('/')[1];
   let path;
   try{path=`products/${crypto.randomUUID()}.${ext}`}catch{path=`products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`}
-  const {error:e}=await withTimeout(supabase.storage.from('product-images').upload(path,file,{upsert:false,contentType:file.type}),15000,'Image upload timed out. Please check your connection and try again.');
+  const {error:e}=await withTimeout(supabase.storage.from('product-images').upload(path,file,{upsert:false,contentType:file.type}),30000,'Image upload timed out. The Supabase Storage permission or connection is not responding. Please try again.');
   if(e)throw new Error(`Image upload failed: ${e.message}`);
   const {data}=supabase.storage.from('product-images').getPublicUrl(path);
   return data.publicUrl;
