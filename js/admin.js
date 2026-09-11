@@ -1,7 +1,7 @@
-console.info('VTS admin.js loaded: v20260911-1530-fixed');
-import { supabase } from './supabase.js?v20260911-1700';
-import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1600';
-import { ADMIN_EMAIL } from './config.js?v20260911-1600';
+console.info('VTS admin.js loaded: v20260911-1638-category-fixed');
+import { supabase } from './supabase.js?v20260911-1638-category-fixed';
+import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1638-category-fixed';
+import { ADMIN_EMAIL } from './config.js?v20260911-1638-category-fixed';
 
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 let products=[], categories=[], settings;
@@ -22,23 +22,6 @@ function setSaving(state){
   if(button){button.disabled=state;button.setAttribute('aria-busy',String(state));button.textContent=state?'Saving…':'Save Product'}
 }
 function withTimeout(promise,ms,label){return Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label)),ms))])}
-async function isAdmin(user=null){
-  // The admin login is intentionally password-only in the UI. The email is
-  // fixed to ADMIN_EMAIL, so Supabase Auth is the credential check; do not
-  // make login depend on a second admin_users/RPC request that can stall.
-  let currentUser=user;
-  if(!currentUser){
-    const {data,error}=await withTimeout(
-      supabase.auth.getUser(),
-      10000,
-      'Administrator session check timed out. Please check your Supabase configuration.'
-    );
-    if(error) throw new Error(`Administrator session check failed: ${error.message||'Unable to read the authenticated user.'}`);
-    currentUser=data?.user||null;
-  }
-  return String(currentUser?.email||'').trim().toLowerCase()===String(ADMIN_EMAIL||'').trim().toLowerCase();
-}
-
 function setLoginBusy(state){
   const button=$('#login-submit');
   if(!button)return;
@@ -67,6 +50,7 @@ async function boot(){
   // Supabase auth state can be locked by another browser tab/extension and
   // getSession() may wait indefinitely even when the REST API is healthy.
   // The password login below performs the authoritative check after sign-in.
+  fillCategories(p?.category||'');
   showLogin();
   supabase.auth.onAuthStateChange((_event,s)=>{
     if(!s && !authBusy) showLogin();
@@ -132,7 +116,7 @@ async function loadData(){
       supabase.from('services').select('*').order('display_order',{ascending:true})
     ]),12000,'Management data loading timed out. Please check Supabase connectivity and permissions.');
     if(p.error||c.error||s.error) throw p.error||c.error||s.error;
-    products=p.data||[];categories=(c.data||[]).filter(x=>x?.name);settings=s.data;serviceRows=sv.data||[];
+    products=p.data||[];categories=c.data||[];settings=s.data;serviceRows=sv.data||[];
     renderDashboard(serviceRows);renderProducts();renderServices(serviceRows);fillCompany();fillCategories();
   }catch(e){console.error('Management data load failed:',e);toast('Could not load management data. Please check the connection and permissions.','error')}
 }
@@ -143,7 +127,7 @@ function renderProducts(){$('#product-table').innerHTML=products.map(p=>`<tr><td
   $('#product-table').querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',()=>deleteProduct(b.dataset.delete)));
 }
 function renderServices(rows){$('#service-admin-grid').innerHTML=rows.map(s=>`<article class="service-admin-card"><small>${esc(s.category)}</small><h3>${esc(s.name)}</h3><p>${esc(s.description)}</p></article>`).join('')}
-function fillCategories(selected=''){const select=$('#product-category'); if(!select)return; const source=categories.length?categories:DEFAULT_PRODUCT_CATEGORIES.map((name,i)=>({id:null,name,display_order:i+1})); select.innerHTML='<option value="" disabled>Select a category</option>'+source.map(c=>`<option value="${esc(c.name)}">${esc(c.name)}</option>`).join(''); if(selected)select.value=selected; if(!select.value && source.length)select.value=source[0].name;}
+function fillCategories(selected=''){const select=$('#product-category');if(!select)return;const dbNames=categories.map(c=>String(c?.name||'').trim()).filter(Boolean);const names=dbNames.length?dbNames:DEFAULT_PRODUCT_CATEGORIES;select.innerHTML='<option value="" disabled>Select a category</option>'+names.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join('');if(selected)select.value=selected;if(!select.value&&names.length)select.value=names[0];}
 function fillCompany(){
   const f=$('#company-form');
   Object.entries(settings||{}).forEach(([k,v])=>{const el=f.elements[k];if(el)el.value=v??''});
@@ -157,12 +141,11 @@ function fillCompany(){
 }
 function openEditor(p){
   const form=$('#product-form');form.reset();$('#editor-error').classList.add('hidden');newImageFile=null;currentImagePath=p?.image_url||null;$('#product-image').value='';
-  fillCategories(p?.category||'');
+  fillCategories();
   const promotionEnabled=form.elements.promotion_enabled;
   if(p){
     $('#editor-title').textContent='Edit Product';
-    Object.entries(p).forEach(([k,v])=>{const el=form.elements[k];if(el && k!=='category')el.value=typeof v==='object'?arrayLines(v):v??''});
-    fillCategories(p.category||'');
+    Object.entries(p).forEach(([k,v])=>{const el=form.elements[k];if(el)el.value=typeof v==='object'?arrayLines(v):v??''});
   }else $('#editor-title').textContent='Add Product';
   promotionEnabled.checked=hasPromotion(p);
   form.elements.promotion_type.value=p?.promotion_type||'on_sale';
@@ -216,7 +199,7 @@ async function saveProduct(e){
       if(Number(salePrice)>=Number(originalPrice))throw new Error('Sale/current price must be lower than the original price.');
     }
     const data={
-      name,category:f.elements.category.value,category_id:(categories.find(c=>c.name===f.elements.category.value)?.id||null),slug:slugify(name),
+      name,category:f.elements.category.value,category_id:(categories.find(c=>String(c?.name||'').trim()===f.elements.category.value)?.id||null),slug:slugify(name),
       short_description:f.elements.short_description.value.trim(),
       description:f.elements.description.value.trim(),
       price:priceValue===''?null:Number(priceValue),
