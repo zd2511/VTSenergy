@@ -106,37 +106,37 @@ create policy admin_users_select on public.admin_users for select to authenticat
 drop policy if exists settings_public_read on public.site_settings;
 create policy settings_public_read on public.site_settings for select to anon,authenticated using(true);
 drop policy if exists settings_admin_write on public.site_settings;
-create policy settings_admin_write on public.site_settings for update to authenticated using(public.is_admin());
+create policy settings_admin_write on public.site_settings for update to authenticated using(lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com');
 
 drop policy if exists categories_public_read on public.categories;
-create policy categories_public_read on public.categories for select to anon,authenticated using(active=true or public.is_admin());
+create policy categories_public_read on public.categories for select to anon,authenticated using(active=true or lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com');
 drop policy if exists categories_admin_write on public.categories;
 drop policy if exists categories_admin_insert on public.categories;
 drop policy if exists categories_admin_update on public.categories;
 drop policy if exists categories_admin_delete on public.categories;
-create policy categories_admin_insert on public.categories for insert to authenticated with check(public.is_admin());
-create policy categories_admin_update on public.categories for update to authenticated using(public.is_admin()) with check(public.is_admin());
-create policy categories_admin_delete on public.categories for delete to authenticated using(public.is_admin());
+create policy categories_admin_insert on public.categories for insert to authenticated with check(lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com');
+create policy categories_admin_update on public.categories for update to authenticated using(lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com') with check(lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com');
+create policy categories_admin_delete on public.categories for delete to authenticated using(lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com');
 
 drop policy if exists products_public_read on public.products;
-create policy products_public_read on public.products for select to anon,authenticated using(active=true or public.is_admin());
+create policy products_public_read on public.products for select to anon,authenticated using(active=true or lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com');
 drop policy if exists products_admin_write on public.products;
 drop policy if exists products_admin_insert on public.products;
 drop policy if exists products_admin_update on public.products;
 drop policy if exists products_admin_delete on public.products;
-create policy products_admin_insert on public.products for insert to authenticated with check(public.is_admin());
-create policy products_admin_update on public.products for update to authenticated using(public.is_admin()) with check(public.is_admin());
-create policy products_admin_delete on public.products for delete to authenticated using(public.is_admin());
+create policy products_admin_insert on public.products for insert to authenticated with check(lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com');
+create policy products_admin_update on public.products for update to authenticated using(lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com') with check(lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com');
+create policy products_admin_delete on public.products for delete to authenticated using(lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com');
 
 drop policy if exists services_public_read on public.services;
-create policy services_public_read on public.services for select to anon,authenticated using(active=true or public.is_admin());
+create policy services_public_read on public.services for select to anon,authenticated using(active=true or lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com');
 drop policy if exists services_admin_write on public.services;
 drop policy if exists services_admin_insert on public.services;
 drop policy if exists services_admin_update on public.services;
 drop policy if exists services_admin_delete on public.services;
-create policy services_admin_insert on public.services for insert to authenticated with check(public.is_admin());
-create policy services_admin_update on public.services for update to authenticated using(public.is_admin()) with check(public.is_admin());
-create policy services_admin_delete on public.services for delete to authenticated using(public.is_admin());
+create policy services_admin_insert on public.services for insert to authenticated with check(lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com');
+create policy services_admin_update on public.services for update to authenticated using(lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com') with check(lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com');
+create policy services_admin_delete on public.services for delete to authenticated using(lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com');
 
 -- Storage bucket
 insert into storage.buckets(id,name,public) values('product-images','product-images',true) on conflict(id) do update set public=true;
@@ -148,9 +148,9 @@ drop policy if exists product_images_authenticated_write on storage.objects;
 drop policy if exists product_images_admin_insert on storage.objects;
 drop policy if exists product_images_admin_update on storage.objects;
 drop policy if exists product_images_admin_delete on storage.objects;
-create policy product_images_admin_insert on storage.objects for insert to authenticated with check(bucket_id='product-images' and lower(coalesce(auth.jwt()->>'email','')) = 'zapifydesigns@gmail.com');
-create policy product_images_admin_update on storage.objects for update to authenticated using(bucket_id='product-images' and lower(coalesce(auth.jwt()->>'email','')) = 'zapifydesigns@gmail.com') with check(bucket_id='product-images' and lower(coalesce(auth.jwt()->>'email','')) = 'zapifydesigns@gmail.com');
-create policy product_images_admin_delete on storage.objects for delete to authenticated using(bucket_id='product-images' and lower(coalesce(auth.jwt()->>'email','')) = 'zapifydesigns@gmail.com');
+create policy product_images_admin_insert on storage.objects for insert to authenticated with check(bucket_id='product-images' and lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com');
+create policy product_images_admin_update on storage.objects for update to authenticated using(bucket_id='product-images' and lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com') with check(bucket_id='product-images' and lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com');
+create policy product_images_admin_delete on storage.objects for delete to authenticated using(bucket_id='product-images' and lower(coalesce(auth.jwt()->>'email',''))='zapifydesigns@gmail.com');
 
 -- Seed data
 insert into public.site_settings(id,company_name,legal_name,registration_number,phone,phone2,whatsapp,sales_email,info_email,address,coverage,mission,vision,values) 

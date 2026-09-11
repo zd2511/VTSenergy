@@ -1,7 +1,7 @@
-console.info('VTS admin.js loaded: v20260911-1645-image-upload-fixed');
-import { supabase } from './supabase.js?v20260911-1645-image-upload-fixed';
-import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1645-image-upload-fixed';
-import { ADMIN_EMAIL } from './config.js?v20260911-1645-image-upload-fixed';
+console.info('VTS admin.js loaded: v20260911-1645-management-fixed');
+import { supabase } from './supabase.js?v20260911-1645-management-fixed';
+import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1645-management-fixed';
+import { ADMIN_EMAIL } from './config.js?v20260911-1645-management-fixed';
 
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 let products=[], categories=[], settings;
@@ -108,18 +108,35 @@ function showSection(name){
   $('#section-title').textContent=target.querySelector('.panel-head h3')?.textContent||'Dashboard';
 }
 async function loadData(){
-  try{
-    const [p,c,s,sv]=await withTimeout(Promise.all([
-      supabase.from('products').select('*').order('display_order',{ascending:true}).order('created_at',{ascending:false}),
-      supabase.from('categories').select('*').eq('active',true).order('display_order',{ascending:true}),
-      supabase.from('site_settings').select('*').single(),
-      supabase.from('services').select('*').order('display_order',{ascending:true})
-    ]),12000,'Management data loading timed out. Please check Supabase connectivity and permissions.');
-    if(p.error||c.error||s.error) throw p.error||c.error||s.error;
-    products=p.data||[];categories=c.data||[];settings=s.data;serviceRows=sv.data||[];
-    renderDashboard(serviceRows);renderProducts();renderServices(serviceRows);fillCompany();fillCategories();
-  }catch(e){console.error('Management data load failed:',e);toast('Could not load management data. Please check the connection and permissions.','error')}
+  // Load each management resource independently. One blocked table must not
+  // prevent the rest of the admin dashboard from appearing.
+  const jobs=[
+    ['products',()=>supabase.from('products').select('*').order('display_order',{ascending:true}).order('created_at',{ascending:false})],
+    ['categories',()=>supabase.from('categories').select('*').eq('active',true).order('display_order',{ascending:true})],
+    ['settings',()=>supabase.from('site_settings').select('*').single()],
+    ['services',()=>supabase.from('services').select('*').order('display_order',{ascending:true})]
+  ];
+  const results=await Promise.all(jobs.map(async ([name,fn])=>{
+    try{
+      const r=await withTimeout(fn(),12000,`${name} management data request timed out.`);
+      return [name,r.data,r.error||null];
+    }catch(e){ return [name,null,e]; }
+  }));
+  const errors=[];
+  for(const [name,data,err] of results){
+    if(err){errors.push(`${name}: ${err.message||err}`);continue;}
+    if(name==='products')products=data||[];
+    else if(name==='categories')categories=data||[];
+    else if(name==='settings')settings=data||{};
+    else if(name==='services')serviceRows=data||[];
+  }
+  renderDashboard(serviceRows);renderProducts();renderServices(serviceRows);fillCompany();fillCategories();
+  if(errors.length){
+    console.error('Management data load issues:',errors);
+    toast(`Some management data could not be loaded: ${errors[0]}`,'error');
+  }
 }
+
 function renderDashboard(services){$('#stat-products').textContent=products.length;$('#stat-featured').textContent=products.filter(p=>p.featured).length;$('#stat-energy').textContent=services.filter(s=>s.category==='Energy Solutions').length;$('#stat-security').textContent=services.filter(s=>s.category==='Digital Security Solutions').length;$('#dashboard-recent').innerHTML=products.slice(0,5).map(p=>`<div class="recent-item"><strong>${esc(p.name)}</strong><small>${esc(p.category)} • ${p.active?'Active':'Inactive'}</small></div>`).join('')}
 function renderProducts(){$('#product-table').innerHTML=products.map(p=>`<tr><td><img class="table-img" src="${esc(imageSrc(p.image_url))}" alt=""></td><td><b>${esc(p.name)}</b>${p.is_demo?'<br><small style="color:#f59e0b">Demo</small>':''}</td><td>${esc(p.category)}</td><td>${hasPromotion(p)?`<span class="admin-promo-badge">${p.promotion_type==='special_offer'?'Special Offer':'On Sale'}</span><br><del>${formatMoney(p.original_price)}</del> <b>${formatMoney(p.sale_price)}</b>`:formatPrice(p)}</td><td>${p.active?'✓':'✗'}</td><td>${p.featured?'✓':'✗'}</td><td><div class="action-row"><button class="mini-btn" data-edit="${esc(p.id)}" type="button">Edit</button><button class="mini-btn" data-toggle="${esc(p.id)}" type="button">${p.active?'Hide':'Show'}</button><button class="mini-btn danger" data-delete="${esc(p.id)}" type="button">Delete</button></div></td></tr>`).join('')||'<tr><td colspan="7">No products found.</td></tr>';
   $('#product-table').querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>openEditor(products.find(p=>p.id===b.dataset.edit))));
@@ -171,7 +188,7 @@ async function uploadImage(file){
   let ext=file.type==='image/jpeg'?'jpg':file.type.split('/')[1];
   let path;
   try{path=`products/${crypto.randomUUID()}.${ext}`}catch{path=`products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`}
-  const {error:e}=await withTimeout(supabase.storage.from('product-images').upload(path,file,{upsert:false,contentType:file.type}),30000,'Image upload timed out. The Supabase Storage permission or connection is not responding. Please try again.');
+  const {error:e}=await withTimeout(supabase.storage.from('product-images').upload(path,file,{upsert:false,contentType:file.type}),15000,'Image upload timed out. Please check your connection and try again.');
   if(e)throw new Error(`Image upload failed: ${e.message}`);
   const {data}=supabase.storage.from('product-images').getPublicUrl(path);
   return data.publicUrl;
