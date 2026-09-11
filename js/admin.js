@@ -1,22 +1,12 @@
-console.info('VTS admin.js loaded: v20260911-1740-management-timeout-fix');
-import { supabase } from './supabase.js?v20260911-1740-management-timeout-fix';
-import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1740-management-timeout-fix';
-import { ADMIN_EMAIL } from './config.js?v20260911-1740-management-timeout-fix';
+console.info('VTS admin.js loaded: v20260911-1755-supabase-debug');
+import { supabase } from './supabase.js?v20260911-1755-supabase-debug';
+import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js?v20260911-1755-supabase-debug';
+import { ADMIN_EMAIL } from './config.js?v20260911-1755-supabase-debug';
 
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 let products=[], categories=[], settings;
 let currentImagePath=null, newImageFile=null, productSaving=false, serviceRows=[], editorSession=0, authBusy=false;
-const DEFAULT_PRODUCT_CATEGORIES = [
-  'Solar',
-  'Inverters',
-  'Batteries',
-  'UPS',
-  'CCTV',
-  'Access Control',
-  'Security Systems',
-  'Cybersecurity',
-  'Other'
-];
+const DEFAULT_PRODUCT_CATEGORIES=['Solar','Inverters','Batteries','UPS','CCTV','Access Control','Security Systems','Cybersecurity','Other'];
 const imgFallback='../assets/images/vts-logo.jpg';
 function imageSrc(value){const v=String(value||'').trim();return /^https?:\/\//i.test(v)?v:imgFallback;}
 function formatMoney(value){ if(value===null||value===undefined||value==='') return ''; const n=Number(value); return Number.isFinite(n)?`R${new Intl.NumberFormat('en-ZA',{maximumFractionDigits:2}).format(n)}`:String(value); }
@@ -65,7 +55,7 @@ async function boot(){
   $('#mobile-menu').addEventListener('click',toggleMobileNav);
   $$('.admin-sidebar nav button').forEach(b=>b.addEventListener('click',()=>{showSection(b.dataset.section);closeMobileNav()}));
   $$('[data-go]').forEach(b=>b.addEventListener('click',()=>showSection(b.dataset.go)));
-  $('#add-product')?.addEventListener('click',()=>openEditor());
+  $('#add-product').addEventListener('click',()=>openEditor());
   $('#product-form').addEventListener('submit',saveProduct);$('#product-form').elements.promotion_enabled.addEventListener('change',togglePromotionFields);
   $('#product-image').addEventListener('change',previewImage);
   $('#clear-image').addEventListener('click',clearImage);
@@ -145,13 +135,14 @@ async function loadData(){
   ];
   const results=await Promise.all(jobs.map(async ([name,fn])=>{
     try{
-      const r=await withTimeout(fn(),30000,`${name} request timed out after 30 seconds. The Supabase project may be waking up, unreachable, or the request may be blocked by database/RLS configuration.`);
+      const r=await withTimeout(fn(),60000,`${name} request timed out after 60 seconds.` );
       return [name,r.data,r.error||null];
     }catch(e){return [name,null,e];}
   }));
   const failures=[];
   for(const [name,data,err] of results){
     if(err){
+      console.error(`VTS management request failed: ${name}`,err);
       failures.push(`${name}: ${err.message||err}`);
       continue;
     }
@@ -165,7 +156,7 @@ async function loadData(){
   renderDashboard(serviceRows);renderProducts();renderServices(serviceRows);fillCompany();fillCategories();
   if(failures.length){
     console.warn('VTS management data warnings:',failures);
-    toast(`Management data warning: ${failures[0]}`,'error');
+    toast(`Some management data could not be loaded: ${failures[0]} — use Refresh Data to retry.`,'error');
   }
 }
 
@@ -220,8 +211,8 @@ async function uploadImage(file){
   let ext=file.type==='image/jpeg'?'jpg':file.type.split('/')[1];
   let path;
   try{path=`products/${crypto.randomUUID()}.${ext}`}catch{path=`products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`}
-  const {error:e}=await withTimeout(supabase.storage.from('product-images').upload(path,file,{upsert:false,contentType:file.type}),15000,'Image upload timed out. Please check your connection and try again.');
-  if(e)throw new Error(`Image upload failed: ${e.message}`);
+  const {error:e}=await withTimeout(supabase.storage.from('product-images').upload(path,file,{upsert:false,contentType:file.type}),60000,'Image upload timed out after 60 seconds. The Supabase Storage request did not complete. Check Supabase Storage, policies, and network connectivity.');
+  if(e){console.error('VTS Supabase Storage upload failed',e);throw new Error(`Image upload failed: ${e.message}`);}
   const {data}=supabase.storage.from('product-images').getPublicUrl(path);
   return data.publicUrl;
 }
@@ -269,34 +260,37 @@ async function saveProduct(e){
 
     const id=f.elements.id.value.trim();
     let res;
-    if(id)res=await withTimeout(supabase.from('products').update(data).eq('id',id).select().single(),15000,'Product save timed out. Please check Supabase connectivity and try again.');
-    else res=await withTimeout(supabase.from('products').insert(data).select().single(),15000,'Product save timed out. Please check Supabase connectivity and try again.');
+    if(id)res=await withTimeout(supabase.from('products').update(data).eq('id',id).select().single(),60000,'Product save timed out after 60 seconds. Check Supabase connectivity, RLS, and network connectivity.');
+    else res=await withTimeout(supabase.from('products').insert(data).select().single(),60000,'Product save timed out after 60 seconds. Check Supabase connectivity, RLS, and network connectivity.');
 
     // The promotion columns live in the supplied migration, but an existing
     // Supabase project may still be using the older products table/schema cache.
     // In that case, save the core product instead of leaving the editor stuck.
+    let promotionFallback=false;
     if(res.error && /original_price|sale_price|promotion_status|promotion_type/i.test(res.error.message||'')){
-      if(promotionEnabled){
-        throw new Error('Promotion fields are not available in the Supabase products table. Run supabase/migration_promotions.sql, reload the PostgREST schema cache, then try again. No product was saved.');
-      }
       const core={...data};
       delete core.promotion_status; delete core.promotion_type; delete core.original_price; delete core.sale_price;
-      res=id
-        ? await withTimeout(supabase.from('products').update(core).eq('id',id).select().single(),15000,'Product save timed out. Please check Supabase connectivity and try again.')
-        : await withTimeout(supabase.from('products').insert(core).select().single(),15000,'Product save timed out. Please check Supabase connectivity and try again.');
+      if(id)res=await withTimeout(supabase.from('products').update(core).eq('id',id).select().single(),60000,'Product save timed out after 60 seconds. Check Supabase connectivity, RLS, and network connectivity.');
+      else res=await withTimeout(supabase.from('products').insert(core).select().single(),60000,'Product save timed out after 60 seconds. Check Supabase connectivity, RLS, and network connectivity.');
+      promotionFallback=true;
     }
     // Older V2 databases may not yet have the optional specifications column.
     if(res.error && /specifications.*column|column.*specifications/i.test(res.error.message||'')){
       const retry={...data};delete retry.specifications;
-      if(id)res=await withTimeout(supabase.from('products').update(retry).eq('id',id).select().single(),15000,'Product save timed out. Please check Supabase connectivity and try again.');
-      else res=await withTimeout(supabase.from('products').insert(retry).select().single(),15000,'Product save timed out. Please check Supabase connectivity and try again.');
+      if(promotionFallback){delete retry.promotion_status;delete retry.promotion_type;delete retry.original_price;delete retry.sale_price;}
+      if(id)res=await withTimeout(supabase.from('products').update(retry).eq('id',id).select().single(),60000,'Product save timed out after 60 seconds. Check Supabase connectivity, RLS, and network connectivity.');
+      else res=await withTimeout(supabase.from('products').insert(retry).select().single(),60000,'Product save timed out after 60 seconds. Check Supabase connectivity, RLS, and network connectivity.');
     }
     if(res.error)throw new Error(res.error.message);
     if(session!==editorSession)return;
     const saved=res.data;
     if(id)products=products.map(p=>p.id===id?saved:p);else products=[saved,...products];
     renderProducts();renderDashboard(serviceRows);syncProductCaches();
-    toast(`Product ${id?'updated':'added'} successfully.`);
+    if(promotionFallback){
+      toast('Product saved. Promotion pricing needs the Supabase promotion migration.','error');
+    }else{
+      toast(`Product ${id?'updated':'added'} successfully.`);
+    }
     closeEditor();
   }catch(err){
     console.error('Product save failed:',err);
@@ -305,8 +299,8 @@ async function saveProduct(e){
     if(session===editorSession)setSaving(false);
   }
 }
-async function toggleProduct(id){const p=products.find(x=>x.id===id);if(!p)return;try{const {data,error:e}=await withTimeout(supabase.from('products').update({active:!p.active}).eq('id',id).select().single(),15000,'Product status update timed out.');if(e)throw e;products=products.map(x=>x.id===id?data:x);renderProducts();renderDashboard(serviceRows);syncProductCaches();toast(`Product ${!p.active?'activated':'deactivated'}.`)}catch(e){console.error(e);toast(`Could not update product: ${e.message||'Unknown error'}`,'error')}}
-async function deleteProduct(id){const p=products.find(x=>x.id===id);if(!p||!confirm(`Are you sure you want to delete this product?\n\n${p.name}`))return;try{const {error:e}=await withTimeout(supabase.from('products').delete().eq('id',id),15000,'Product deletion timed out.');if(e)throw e;products=products.filter(x=>x.id!==id);renderProducts();renderDashboard(serviceRows);syncProductCaches();toast('Product deleted.')}catch(e){console.error(e);toast(`Could not delete product: ${e.message||'Unknown error'}`,'error')}}
+async function toggleProduct(id){const p=products.find(x=>x.id===id);if(!p)return;try{const {data,error:e}=await withTimeout(supabase.from('products').update({active:!p.active}).eq('id',id).select().single(),60000,'Product status update timed out after 60 seconds. Check Supabase connectivity and RLS.');if(e)throw e;products=products.map(x=>x.id===id?data:x);renderProducts();renderDashboard(serviceRows);syncProductCaches();toast(`Product ${!p.active?'activated':'deactivated'}.`)}catch(e){console.error(e);toast(`Could not update product: ${e.message||'Unknown error'}`,'error')}}
+async function deleteProduct(id){const p=products.find(x=>x.id===id);if(!p||!confirm(`Are you sure you want to delete this product?\n\n${p.name}`))return;try{const {error:e}=await withTimeout(supabase.from('products').delete().eq('id',id),60000,'Product deletion timed out after 60 seconds. Check Supabase connectivity and RLS.');if(e)throw e;products=products.filter(x=>x.id!==id);renderProducts();renderDashboard(serviceRows);syncProductCaches();toast('Product deleted.')}catch(e){console.error(e);toast(`Could not delete product: ${e.message||'Unknown error'}`,'error')}}
 async function saveCompany(){
   const f=$('#company-form');
   if(!f.reportValidity())return;
