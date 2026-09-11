@@ -49,8 +49,13 @@ create table if not exists public.products(
   description text not null,
   price numeric,
   price_type text default 'per unit',
+  promotion_status text default 'none',
+  promotion_type text default 'on_sale',
+  original_price numeric,
+  sale_price numeric,
   image_url text,
   features jsonb,
+  specifications jsonb,
   active boolean default true,
   featured boolean default false,
   display_order int default 0,
@@ -58,6 +63,13 @@ create table if not exists public.products(
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+-- Product promotion migration
+alter table public.products add column if not exists specifications jsonb;
+alter table public.products add column if not exists promotion_status text default 'none';
+alter table public.products add column if not exists promotion_type text default 'on_sale';
+alter table public.products add column if not exists original_price numeric;
+alter table public.products add column if not exists sale_price numeric;
 
 -- Services table
 create table if not exists public.services(
@@ -99,17 +111,32 @@ create policy settings_admin_write on public.site_settings for update to authent
 drop policy if exists categories_public_read on public.categories;
 create policy categories_public_read on public.categories for select to anon,authenticated using(active=true or public.is_admin());
 drop policy if exists categories_admin_write on public.categories;
-create policy categories_admin_write on public.categories for insert,update,delete to authenticated using(public.is_admin());
+drop policy if exists categories_admin_insert on public.categories;
+drop policy if exists categories_admin_update on public.categories;
+drop policy if exists categories_admin_delete on public.categories;
+create policy categories_admin_insert on public.categories for insert to authenticated with check(public.is_admin());
+create policy categories_admin_update on public.categories for update to authenticated using(public.is_admin()) with check(public.is_admin());
+create policy categories_admin_delete on public.categories for delete to authenticated using(public.is_admin());
 
 drop policy if exists products_public_read on public.products;
 create policy products_public_read on public.products for select to anon,authenticated using(active=true or public.is_admin());
 drop policy if exists products_admin_write on public.products;
-create policy products_admin_write on public.products for insert,update,delete to authenticated using(public.is_admin());
+drop policy if exists products_admin_insert on public.products;
+drop policy if exists products_admin_update on public.products;
+drop policy if exists products_admin_delete on public.products;
+create policy products_admin_insert on public.products for insert to authenticated with check(public.is_admin());
+create policy products_admin_update on public.products for update to authenticated using(public.is_admin()) with check(public.is_admin());
+create policy products_admin_delete on public.products for delete to authenticated using(public.is_admin());
 
 drop policy if exists services_public_read on public.services;
 create policy services_public_read on public.services for select to anon,authenticated using(active=true or public.is_admin());
 drop policy if exists services_admin_write on public.services;
-create policy services_admin_write on public.services for insert,update,delete to authenticated using(public.is_admin());
+drop policy if exists services_admin_insert on public.services;
+drop policy if exists services_admin_update on public.services;
+drop policy if exists services_admin_delete on public.services;
+create policy services_admin_insert on public.services for insert to authenticated with check(public.is_admin());
+create policy services_admin_update on public.services for update to authenticated using(public.is_admin()) with check(public.is_admin());
+create policy services_admin_delete on public.services for delete to authenticated using(public.is_admin());
 
 -- Storage bucket
 insert into storage.buckets(id,name,public) values('product-images','product-images',true) on conflict(id) do update set public=true;
@@ -118,11 +145,16 @@ drop policy if exists product_images_public_read on storage.objects;
 create policy product_images_public_read on storage.objects for select to public using(bucket_id='product-images');
 
 drop policy if exists product_images_authenticated_write on storage.objects;
-create policy product_images_authenticated_write on storage.objects for insert,update,delete to authenticated using(bucket_id='product-images' and public.is_admin());
+drop policy if exists product_images_admin_insert on storage.objects;
+drop policy if exists product_images_admin_update on storage.objects;
+drop policy if exists product_images_admin_delete on storage.objects;
+create policy product_images_admin_insert on storage.objects for insert to authenticated with check(bucket_id='product-images' and public.is_admin());
+create policy product_images_admin_update on storage.objects for update to authenticated using(bucket_id='product-images' and public.is_admin()) with check(bucket_id='product-images' and public.is_admin());
+create policy product_images_admin_delete on storage.objects for delete to authenticated using(bucket_id='product-images' and public.is_admin());
 
 -- Seed data
 insert into public.site_settings(id,company_name,legal_name,registration_number,phone,phone2,whatsapp,sales_email,info_email,address,coverage,mission,vision,values) 
-values(1,'VTS Energy & Security','VTS Energy & Security (Pty) Ltd','2024/123456','123-456-7890','123-456-7891','27123456789','sales@vtsenergy.com','info@vtsenergy.com','South Africa','National','Provide reliable energy and security solutions','Leader in energy and security innovation','Integrity, Innovation, Impact')
+values(1,'VTS Energy & Security','Volt Tech Solutions (Pty) Ltd','2023/259917/7','+27 33 032 2153','+27 82 269 2150','+27822692150','sales@vtsenergysecurity.co.za','info@vtsenergysecurity.co.za','18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa','South Africa | Zimbabwe | Zambia | Botswana | Namibia | Mozambique | Lesotho | Eswatini | Malawi','To provide reliable, affordable, and professional energy and security solutions that keep African businesses and communities powered, protected, and productive.','To become Southern Africa''s most trusted partner for integrated energy resilience and digital protection.','Reliability — We deliver what we promise, on time and to standard. | Trust — We build long-term relationships through honesty and transparency. | Excellence — We use quality products and certified professionals. | Innovation — We embrace modern technology to solve African challenges. | Safety — We protect people, property, and data at all times.')
 on conflict(id) do nothing;
 
 insert into public.categories(name,display_order) 
