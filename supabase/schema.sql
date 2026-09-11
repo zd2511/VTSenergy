@@ -51,6 +51,7 @@ create table if not exists public.products(
   price_type text default 'per unit',
   image_url text,
   features jsonb,
+  specifications jsonb,
   active boolean default true,
   featured boolean default false,
   display_order int default 0,
@@ -58,6 +59,8 @@ create table if not exists public.products(
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+alter table public.products add column if not exists specifications jsonb;
 
 -- Services table
 create table if not exists public.services(
@@ -151,7 +154,7 @@ create policy product_images_authenticated_delete on storage.objects for delete 
 
 -- Seed data
 insert into public.site_settings(id,company_name,legal_name,registration_number,phone,phone2,whatsapp,sales_email,info_email,address,coverage,mission,vision,values) 
-values(1,'VTS Energy & Security','VTS Energy & Security (Pty) Ltd','2024/123456','123-456-7890','123-456-7891','27123456789','sales@vtsenergy.com','info@vtsenergy.com','South Africa','National','Provide reliable energy and security solutions','Leader in energy and security innovation','Integrity, Innovation, Impact')
+values(1,'VTS Energy & Security','Volt Tech Solutions (Pty) Ltd','2023/259917/7','+27 33 032 2153','+27 82 269 2150','+27822692150','sales@vtsenergysecurity.co.za','info@vtsenergysecurity.co.za','18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa','South Africa | Zimbabwe | Zambia | Botswana | Namibia | Mozambique | Lesotho | Eswatini | Malawi','To provide reliable, affordable, and professional energy and security solutions that keep African businesses and communities powered, protected, and productive.','To become Southern Africa''s most trusted partner for integrated energy resilience and digital protection.','Reliability | Trust | Excellence | Innovation | Safety')
 on conflict(id) do nothing;
 
 insert into public.categories(name,display_order) 
@@ -169,12 +172,24 @@ on conflict(name) do nothing;
 
 insert into public.services(name,category,description,display_order,image) 
 values
-  ('Solar power installation','Energy Solutions','Professional solar installation planning and delivery for resilient energy systems.',1,'solar'),
-  ('Backup battery systems','Energy Solutions','Battery storage solutions for continuous power supply.',2,'battery'),
-  ('UPS systems','Energy Solutions','Uninterruptible power supply systems for critical infrastructure.',3,'ups'),
-  ('CCTV surveillance','Digital Security Solutions','Professional surveillance system installation and monitoring.',4,'cctv'),
-  ('Access control','Digital Security Solutions','Secure entry systems and access management solutions.',5,'access'),
-  ('Security monitoring','Digital Security Solutions','24/7 security monitoring and alert response.',6,'monitoring')
+  ('Solar power installation','Energy Solutions','VTS specialises in solar power installations designed to support reliable energy continuity across the region.',1,'solar'),
+  ('Backup battery systems','Energy Solutions','Backup battery systems that help maintain power availability during interruptions.',2,'battery'),
+  ('UPS installation','Energy Solutions','UPS installation for equipment and operations that require protected, uninterrupted power.',3,'ups'),
+  ('Inverter systems','Energy Solutions','Inverter systems for practical energy resilience and power management.',4,'inverter'),
+  ('Load shedding protection','Energy Solutions','Solutions designed to reduce the operational impact of load shedding.',5,'energy'),
+  ('Generator integration','Energy Solutions','Generator integration to support broader backup power strategies.',6,'generator'),
+  ('Energy audits','Energy Solutions','Energy audits to assess requirements and identify practical opportunities for improved energy resilience.',7,'audit'),
+  ('Energy monitoring','Energy Solutions','Energy monitoring to help clients understand and manage their energy use.',8,'monitor'),
+  ('Cybersecurity services','Digital Security Solutions','Cybersecurity services designed to safeguard businesses against modern digital threats.',1,'cyber'),
+  ('Network security','Digital Security Solutions','Network security solutions focused on protecting connected business environments.',2,'network'),
+  ('Data protection','Digital Security Solutions','Data protection measures designed to help safeguard business information.',3,'data'),
+  ('CCTV surveillance','Digital Security Solutions','CCTV surveillance systems for monitoring and protecting business and property environments.',4,'cctv'),
+  ('Access control systems','Digital Security Solutions','Access control systems to manage and secure entry to protected areas.',5,'access'),
+  ('Biometric security','Digital Security Solutions','Biometric security solutions for controlled and accountable access.',6,'biometric'),
+  ('Alarm systems','Digital Security Solutions','Alarm systems for detection and security awareness.',7,'alarm'),
+  ('Remote monitoring','Digital Security Solutions','Remote monitoring solutions for visibility over security systems and environments.',8,'remote'),
+  ('Security audits','Digital Security Solutions','Security audits to review existing security arrangements and requirements.',9,'security-audit'),
+  ('Vulnerability assessments','Digital Security Solutions','Vulnerability assessments to identify potential weaknesses requiring attention.',10,'vulnerability')
 on conflict do nothing;
 
 insert into public.products(name,slug,category,short_description,description,price,price_type,image_url,featured,display_order,is_demo) 
@@ -185,6 +200,46 @@ values
   ('CCTV Surveillance Package','cctv-surveillance-package','CCTV','DEMO / REPLACE: A CCTV catalogue entry.','Demonstration entry. Replace with verified camera, recorder, storage and installation details.',12000,'per unit','cctv.jpg',false,4,true),
   ('Access Control System','access-control-system','Access Control','DEMO / REPLACE: A controlled-entry catalogue entry.','Demonstration entry. Replace with verified access hardware, reader type and installation specifications.',8000,'per unit','access.jpg',false,5,true)
 on conflict(slug) do nothing;
+
+
+-- Correct the central company record when this schema is applied to an existing VTS installation.
+update public.site_settings set
+  company_name='VTS Energy & Security',
+  legal_name='Volt Tech Solutions (Pty) Ltd',
+  registration_number='2023/259917/7',
+  phone='+27 33 032 2153',
+  phone2='+27 82 269 2150',
+  whatsapp='+27822692150',
+  sales_email='sales@vtsenergysecurity.co.za',
+  info_email='info@vtsenergysecurity.co.za',
+  address='18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa',
+  coverage='South Africa | Zimbabwe | Zambia | Botswana | Namibia | Mozambique | Lesotho | Eswatini | Malawi',
+  mission='To provide reliable, affordable, and professional energy and security solutions that keep African businesses and communities powered, protected, and productive.',
+  vision='To become Southern Africa''s most trusted partner for integrated energy resilience and digital protection.',
+  values='Reliability | Trust | Excellence | Innovation | Safety',
+  updated_at=now()
+where id=1;
+
+-- Ensure the complete verified service directory exists and corrects the supplied service descriptions.
+
+update public.services set description='VTS specialises in solar power installations designed to support reliable energy continuity across the region.' where name='Solar power installation';
+update public.services set description='Backup battery systems that help maintain power availability during interruptions.' where name='Backup battery systems';
+update public.services set description='UPS installation for equipment and operations that require protected, uninterrupted power.' where name='UPS installation';
+update public.services set description='Inverter systems for practical energy resilience and power management.' where name='Inverter systems';
+update public.services set description='Solutions designed to reduce the operational impact of load shedding.' where name='Load shedding protection';
+update public.services set description='Generator integration to support broader backup power strategies.' where name='Generator integration';
+update public.services set description='Energy audits to assess requirements and identify practical opportunities for improved energy resilience.' where name='Energy audits';
+update public.services set description='Energy monitoring to help clients understand and manage their energy use.' where name='Energy monitoring';
+update public.services set description='Cybersecurity services designed to safeguard businesses against modern digital threats.' where name='Cybersecurity services';
+update public.services set description='Network security solutions focused on protecting connected business environments.' where name='Network security';
+update public.services set description='Data protection measures designed to help safeguard business information.' where name='Data protection';
+update public.services set description='CCTV surveillance systems for monitoring and protecting business and property environments.' where name='CCTV surveillance';
+update public.services set description='Access control systems to manage and secure entry to protected areas.' where name='Access control systems';
+update public.services set description='Biometric security solutions for controlled and accountable access.' where name='Biometric security';
+update public.services set description='Alarm systems for detection and security awareness.' where name='Alarm systems';
+update public.services set description='Remote monitoring solutions for visibility over security systems and environments.' where name='Remote monitoring';
+update public.services set description='Security audits to review existing security arrangements and requirements.' where name='Security audits';
+update public.services set description='Vulnerability assessments to identify potential weaknesses requiring attention.' where name='Vulnerability assessments';
 
 -- Triggers for updated_at
 create or replace function public.touch_updated_at() returns trigger language plpgsql as $$
