@@ -24,3 +24,9 @@ The public client configuration remains in `js/config.js`. No administrator pass
 - Contact page includes a no-key Google Maps embed plus the verified Prestbury address.
 - Existing footer Quick Links and the `VTS` administrator link are preserved and point to the existing authenticated admin area.
 - `supabase/schema.sql` and `supabase/schema_complete.sql` include the promotion fields/migrations.
+
+
+## Final fixes
+- Admin login intentionally remains password-only in the UI and authenticates against the configured ADMIN_EMAIL via Supabase Auth.
+- Admin promotion helpers are self-contained and also exported from data.js to prevent module export mismatches.
+- Google Maps is displayed on both Contact and the homepage near the end of the page.

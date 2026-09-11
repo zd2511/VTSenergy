@@ -1,11 +1,13 @@
 import { supabase } from './supabase.js';
-import { formatPrice, formatMoney, hasPromotion, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js';
+import { formatPrice, slugify, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_WHATSAPP, HOMEPAGE_COVERAGE, REQUIRED_MISSION, REQUIRED_VISION, REQUIRED_VALUES } from './data.js';
 import { ADMIN_EMAIL } from './config.js';
 
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 let products=[], categories=[], settings;
 let currentImagePath=null, newImageFile=null, productSaving=false, serviceRows=[];
 const imgFallback='../assets/images/vts-logo.jpg';
+function formatMoney(value){ if(value===null||value===undefined||value==='') return ''; const n=Number(value); return Number.isFinite(n)?`R${new Intl.NumberFormat('en-ZA',{maximumFractionDigits:2}).format(n)}`:String(value); }
+function hasPromotion(product){ return Boolean(product?.promotion_status && product.promotion_status!=='none' && product?.original_price!==null && product?.original_price!==undefined && product?.sale_price!==null && product?.sale_price!==undefined); }
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function toast(msg,type='success'){const el=document.createElement('div');el.className=`admin-toast ${type}`;el.setAttribute('role','status');el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),3600)}
@@ -16,13 +18,23 @@ function setSaving(state){
   const button=$('#product-form button[type="submit"]');
   if(button){button.disabled=state;button.setAttribute('aria-busy',String(state));button.textContent=state?'Saving…':'Save Product'}
 }
-async function isAdmin(){try{const {data,error}=await supabase.rpc('is_admin');return !error&&data===true}catch{return false}}
+async function isAdmin(){
+  const {data,error}=await supabase.rpc('is_admin');
+  if(error) throw new Error(`Administrator check failed: ${error.message||'The is_admin function is unavailable.'}`);
+  return data===true;
+}
+
+function setLoginBusy(state){
+  const button=$('#login-submit');
+  if(!button)return;
+  button.disabled=state;
+  button.setAttribute('aria-busy',String(state));
+  button.textContent=state?'Signing in…':'Sign In';
+}
 
 async function boot(){
-  const {data:{session}}=await supabase.auth.getSession();
-  if(session&&await isAdmin()) showApp(); else showLogin();
-  supabase.auth.onAuthStateChange(async(_event,s)=>{if(s&&await isAdmin())showApp();else if(!s)showLogin()});
-
+  // Attach UI handlers first. If Supabase is temporarily unavailable, the login
+  // form must still respond and show a useful error instead of appearing dead.
   $('#login-form').addEventListener('submit',login);
   $('#logout').addEventListener('click',logout);
   $('#mobile-menu').addEventListener('click',toggleMobileNav);
@@ -36,6 +48,23 @@ async function boot(){
   $('#save-company').addEventListener('click',saveCompany);
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMobileNav();if(!$('#product-editor').classList.contains('hidden'))closeEditor()}});
   $('#admin-nav-backdrop')?.addEventListener('click',closeMobileNav);
+  try{
+    const {data:{session}}=await supabase.auth.getSession();
+    if(session){
+      try{ if(await isAdmin()) showApp(); else { await supabase.auth.signOut(); showLogin(); } }
+      catch(err){ console.error(err); showLogin(); error(err.message); }
+    }else showLogin();
+  }catch(err){
+    console.error('Admin session check failed:',err);
+    showLogin();
+    error(`Unable to connect to the administrator service. ${err?.message||'Please check your internet connection and Supabase configuration.'}`);
+  }
+  supabase.auth.onAuthStateChange(async(_event,s)=>{
+    if(!s){showLogin();return;}
+    try{if(await isAdmin())showApp();else{await supabase.auth.signOut();showLogin();error('This account is authenticated but is not registered as a VTS administrator.');}}
+    catch(err){console.error(err);showLogin();error(err.message||'Administrator verification failed.');}
+  });
+
   document.addEventListener('click',e=>{
     const sidebar=$('.admin-sidebar'), menu=$('#mobile-menu');
     if(window.innerWidth<=760 && sidebar.classList.contains('open') && !sidebar.contains(e.target) && e.target!==menu) closeMobileNav();
@@ -55,10 +84,14 @@ async function login(e){
   e.preventDefault(); $('#login-error').classList.add('hidden');
   const password=$('#login-password').value;
   if(!password)return error('Please enter a password');
-  const {error:e1}=await supabase.auth.signInWithPassword({email:ADMIN_EMAIL,password});
-  if(e1)return error(`Login failed: ${e1.message}`);
-  if(!await isAdmin()){await supabase.auth.signOut();return error('User is not an administrator')}
-  showApp();
+  try{
+    setLoginBusy(true);
+    const {error:e1}=await supabase.auth.signInWithPassword({email:ADMIN_EMAIL,password});
+    if(e1)throw new Error(e1.message);
+    if(!await isAdmin()){await supabase.auth.signOut();throw new Error('User is authenticated but is not registered as a VTS administrator.');}
+    showApp();
+  }catch(err){console.error('Admin login failed:',err);error(`Login failed: ${err?.message||'Unable to sign in. Please check the password and Supabase configuration.'}`);}
+  finally{setLoginBusy(false);}
 }
 async function logout(){await supabase.auth.signOut();showLogin()}
 function showLogin(){$('#login-view').classList.remove('hidden');$('#app-view').classList.add('hidden');closeMobileNav()}
@@ -210,4 +243,6 @@ async function saveCompany(){
   const row={company_name:f.elements.company_name.value.trim(),legal_name:f.elements.legal_name.value.trim(),registration_number:f.elements.registration_number.value.trim(),phone:REQUIRED_PHONE,phone2:REQUIRED_PHONE2,whatsapp:REQUIRED_WHATSAPP,sales_email:f.elements.sales_email.value.trim(),info_email:f.elements.info_email.value.trim(),address:f.elements.address.value.trim(),coverage:HOMEPAGE_COVERAGE,mission:REQUIRED_MISSION,vision:REQUIRED_VISION,values:REQUIRED_VALUES};
   try{const {error:e}=await supabase.from('site_settings').update(row).eq('id',1);if(e)throw e;settings={...settings,...row};toast('Company information saved.')}catch(e){console.error(e);toast(`Failed to save company information: ${e.message||'Unknown error'}`,'error')}
 }
+const loginEmail=$('#login-email');
+if(loginEmail)loginEmail.value=ADMIN_EMAIL;
 boot();
