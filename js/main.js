@@ -23,8 +23,11 @@ async function boot(){
     navEl.querySelectorAll('.nav-links a').forEach(link=>link.addEventListener('click',closeMenu));
     document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
   }
-  try{settings=await getSettings()}catch(e){settings=undefined;toast('Live company data could not be loaded. Check Supabase configuration.','error')}
-  if(footer) footer.innerHTML=footerMarkup(settings||{phone:REQUIRED_PHONE,phone2:REQUIRED_PHONE2,sales_email:'sales@vtsenergysecurity.co.za',info_email:'info@vtsenergysecurity.co.za',address:'18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa',legal_name:'Volt Tech Solutions (Pty) Ltd',registration_number:'2023/259917/7'});
+  const fallback={phone:REQUIRED_PHONE,phone2:REQUIRED_PHONE2,sales_email:'sales@vtsenergysecurity.co.za',info_email:'info@vtsenergysecurity.co.za',address:'18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa',legal_name:'Volt Tech Solutions (Pty) Ltd',registration_number:'2023/259917/7'};
+  // Render the footer immediately so a slow/offline Supabase connection can never make Quick Links disappear.
+  if(footer) footer.innerHTML=footerMarkup(fallback);
+  try{settings=await getSettings()}catch(e){settings=fallback}
+  if(footer) footer.innerHTML=footerMarkup(settings||fallback);
   const coverage=document.querySelectorAll('#coverage-list');
   if(settings?.coverage) coverage.forEach(el=>{
     const value=page==='home' ? HOMEPAGE_COVERAGE : settings.coverage;

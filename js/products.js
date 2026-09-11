@@ -2,15 +2,16 @@ import { getPublicProducts, getFeaturedProducts, getSettings, formatPrice, forma
 
 let allProducts=[]; let siteSettings;
 const imgFallback='https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80';
+function imageSrc(value){const v=String(value||'').trim();return /^https?:\/\//i.test(v)?v:imgFallback;}
 function promotionMarkup(p){
   if(!hasPromotion(p)) return '';
   const type=p.promotion_type==='special_offer'?'SPECIAL OFFER':'ON SALE';
   const saving=Number(p.original_price)-Number(p.sale_price);
   return `<div class="product-promo"><span>${type}</span><div class="promo-prices"><del>${formatMoney(p.original_price)}</del><strong>${formatMoney(p.sale_price)}</strong>${saving>0?`<small>Save ${formatMoney(saving)}</small>`:''}</div></div>`;
 }
-function card(p){return `<article class="product-card">${promotionMarkup(p)}<div class="product-img" style="background-image:url('${p.image_url||imgFallback}')"></div><div class="product-body"><span class="product-cat">${p.category||'Other'}</span><h3>${esc(p.name)}</h3><p>${esc(p.short_description||'Explore this VTS solution.')}</p><div class="price ${hasPromotion(p)?'hidden':''}">${formatPrice(p)}</div><div class="card-actions"><button class="btn btn-dark" data-view="${p.id}">View Product</button><a class="btn btn-primary" target="_blank" rel="noopener" href="${whatsappUrl(siteSettings?.whatsapp,p.name)}">WhatsApp</a></div></div></article>`}
+function card(p){return `<article class="product-card">${promotionMarkup(p)}<div class="product-img" style="background-image:url('${imageSrc(p.image_url)}')"></div><div class="product-body"><span class="product-cat">${p.category||'Other'}</span><h3>${esc(p.name)}</h3><p>${esc(p.short_description||'Explore this VTS solution.')}</p><div class="price ${hasPromotion(p)?'hidden':''}">${formatPrice(p)}</div><div class="card-actions"><button class="btn btn-dark" data-view="${p.id}">View Product</button><a class="btn btn-primary" target="_blank" rel="noopener" href="${whatsappUrl(siteSettings?.whatsapp,p.name)}">WhatsApp</a></div></div></article>`}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function openProduct(p){if(!p||!p.id)return; const modal=document.querySelector('#product-modal'), content=document.querySelector('#product-modal-content'); if(!modal||!content){if(p.slug) window.location.href=`products.html?product=${encodeURIComponent(p.slug)}`; return;} const features=Array.isArray(p.features)?p.features:[]; const specs=Array.isArray(p.specifications)?p.specifications:[]; content.innerHTML=`<div class="modal-product"><div class="modal-product-image" style="background-image:url('${p.image_url||imgFallback}')"></div><div class="modal-product-body"><span class="product-cat">${esc(p.category||'Other')}</span><h2>${esc(p.name)}</h2><div class="price ${hasPromotion(p)?'hidden':''}">${formatPrice(p)}</div>${promotionMarkup(p)}<p>${esc(p.description||p.short_description)}</p>${features.length?`<h3>Features</h3><ul class="spec-list">${features.map(x=>`<li>${esc(typeof x==='string'?x:x.label||'')}</li>`).join('')}</ul>`:''}${specs.length?`<h3>Specifications</h3><ul class="spec-list">${specs.map(x=>`<li>${esc(typeof x==='string'?x:`${x.label||''}: ${x.value||''}`)}</li>`).join('')}</ul>`:''}<a class="btn btn-primary" target="_blank" rel="noopener" href="${whatsappUrl(siteSettings?.whatsapp,p.name)}">Enquire About This Product on WhatsApp ↗</a></div></div>`; modal.classList.remove('hidden');modal.setAttribute('aria-hidden','false'); history.replaceState(null,'',`products.html?product=${encodeURIComponent(p.slug)}`)}
+function openProduct(p){if(!p||!p.id)return; const modal=document.querySelector('#product-modal'), content=document.querySelector('#product-modal-content'); if(!modal||!content){if(p.slug) window.location.href=`products.html?product=${encodeURIComponent(p.slug)}`; return;} const features=Array.isArray(p.features)?p.features:[]; const specs=Array.isArray(p.specifications)?p.specifications:[]; content.innerHTML=`<div class="modal-product"><div class="modal-product-image" style="background-image:url('${imageSrc(p.image_url)}')"></div><div class="modal-product-body"><span class="product-cat">${esc(p.category||'Other')}</span><h2>${esc(p.name)}</h2><div class="price ${hasPromotion(p)?'hidden':''}">${formatPrice(p)}</div>${promotionMarkup(p)}<p>${esc(p.description||p.short_description)}</p>${features.length?`<h3>Features</h3><ul class="spec-list">${features.map(x=>`<li>${esc(typeof x==='string'?x:x.label||'')}</li>`).join('')}</ul>`:''}${specs.length?`<h3>Specifications</h3><ul class="spec-list">${specs.map(x=>`<li>${esc(typeof x==='string'?x:`${x.label||''}: ${x.value||''}`)}</li>`).join('')}</ul>`:''}<a class="btn btn-primary" target="_blank" rel="noopener" href="${whatsappUrl(siteSettings?.whatsapp,p.name)}">Enquire About This Product on WhatsApp ↗</a></div></div>`; modal.classList.remove('hidden');modal.setAttribute('aria-hidden','false'); history.replaceState(null,'',`products.html?product=${encodeURIComponent(p.slug)}`)}
 function closeProduct(){const modal=document.querySelector('#product-modal');if(modal){modal.classList.add('hidden');modal.setAttribute('aria-hidden','true');if(location.search)history.replaceState(null,'','products.html')}}
 function solutionGroup(category=''){
   const value=String(category).toLowerCase();
@@ -44,12 +45,14 @@ async function boot(){
   try{siteSettings=await getSettings(); allProducts=await getPublicProducts()}catch(e){if(catalogue)catalogue.innerHTML='<div class="empty-state">Product catalogue unavailable. Please check the site connection.</div>';return}
   if(featured){
     let f=[]; try{f=await getFeaturedProducts()}catch(e){console.error('Featured products load failed:',e)}
+    // If no products are explicitly marked Featured, keep the homepage populated with the latest catalogue items.
+    if(!f.length) f=allProducts.slice(0,6);
     const renderFeatured=(filter='All')=>{
       const rows=filter==='All'?f:f.filter(p=>solutionGroup(p.category)===filter);
       featured.innerHTML=rows.length?rows.map(card).join(''):'<div class="empty-state">No selected solutions match this filter yet.</div>';
       attachViewHandlers(featured);
     };
-    renderFeaturedFilters(allProducts,renderFeatured);
+    renderFeaturedFilters(f,renderFeatured);
     renderFeatured();
   }
   if(catalogue){
@@ -60,6 +63,5 @@ async function boot(){
   }
   document.querySelectorAll('[data-close-product]').forEach(x=>x.addEventListener('click',closeProduct));
 }
-boot();
 function attachViewHandlers(root){root.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>openProduct(allProducts.find(p=>p.id===b.dataset.view)||[])))}
 boot();

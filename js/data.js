@@ -1,5 +1,8 @@
 import { supabase } from './supabase.js';
 
+const REQUEST_TIMEOUT=10000;
+function timed(promise,label='The VTS data service timed out.'){return Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label)),REQUEST_TIMEOUT))])}
+
 export const REQUIRED_PHONE = '+27 33 032 2153';
 export const REQUIRED_PHONE2 = '+27 82 269 2150';
 export const REQUIRED_WHATSAPP = '+27822692150';
@@ -25,35 +28,55 @@ export const fallbackSettings = {
 };
 
 export async function getSettings() {
-  const { data, error } = await supabase.from('site_settings').select('*').eq('id', 1).maybeSingle();
-  if (error) throw error;
-  // Public contact/content requirements are intentionally enforced here so a stale
-  // Supabase row cannot reintroduce retired contact details or older About copy.
-  return {
-    ...(data || fallbackSettings),
+  try {
+    const { data, error } = await timed(supabase.from('site_settings').select('*').eq('id', 1).maybeSingle(),'Company information request timed out.');
+    if (error) throw error;
+    localStorage.setItem('vts_site_settings', JSON.stringify(data || fallbackSettings));
+    return {
+      ...(data || fallbackSettings),
     phone: REQUIRED_PHONE,
     phone2: REQUIRED_PHONE2,
     whatsapp: REQUIRED_WHATSAPP,
     mission: REQUIRED_MISSION,
     vision: REQUIRED_VISION,
-    values: REQUIRED_VALUES
-  };
+      values: REQUIRED_VALUES
+    };
+  } catch (error) {
+    try {
+      const cached = JSON.parse(localStorage.getItem('vts_site_settings') || 'null');
+      return { ...(cached || fallbackSettings), phone: REQUIRED_PHONE, phone2: REQUIRED_PHONE2, whatsapp: REQUIRED_WHATSAPP, mission: REQUIRED_MISSION, vision: REQUIRED_VISION, values: REQUIRED_VALUES };
+    } catch {
+      return { ...fallbackSettings };
+    }
+  }
 }
 
 export async function getPublicProducts() {
-  const { data, error } = await supabase.from('products').select('*').eq('active', true).order('display_order', { ascending: true }).order('created_at', { ascending: false });
-  if (error) throw error;
-  return data || [];
+  try {
+    const { data, error } = await timed(supabase.from('products').select('*').eq('active', true).order('display_order', { ascending: true }).order('created_at', { ascending: false }),'Product catalogue request timed out.');
+    if (error) throw error;
+    const rows = data || [];
+    localStorage.setItem('vts_public_products', JSON.stringify(rows));
+    return rows;
+  } catch (error) {
+    try { return JSON.parse(localStorage.getItem('vts_public_products') || '[]'); } catch { return []; }
+  }
 }
 
 export async function getFeaturedProducts() {
-  const { data, error } = await supabase.from('products').select('*').eq('active', true).eq('featured', true).order('display_order', { ascending: true }).limit(6);
-  if (error) throw error;
-  return data || [];
+  try {
+    const { data, error } = await timed(supabase.from('products').select('*').eq('active', true).eq('featured', true).order('display_order', { ascending: true }).limit(6),'Featured products request timed out.');
+    if (error) throw error;
+    const rows = data || [];
+    localStorage.setItem('vts_featured_products', JSON.stringify(rows));
+    return rows;
+  } catch (error) {
+    try { return JSON.parse(localStorage.getItem('vts_featured_products') || '[]'); } catch { return []; }
+  }
 }
 
 export async function getServices() {
-  const { data, error } = await supabase.from('services').select('*').eq('active', true).order('display_order', { ascending: true });
+  const { data, error } = await timed(supabase.from('services').select('*').eq('active', true).order('display_order', { ascending: true }),'Services request timed out.');
   if (error) throw error;
   return data || [];
 }
