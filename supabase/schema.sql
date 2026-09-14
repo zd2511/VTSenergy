@@ -162,7 +162,7 @@ create policy product_images_authenticated_delete on storage.objects for delete 
 
 -- Seed data
 insert into public.site_settings(id,company_name,legal_name,registration_number,phone,phone2,whatsapp,sales_email,info_email,address,coverage,mission,vision,values) 
-values(1,'VTS Energy & Security','Volt Tech Solutions (Pty) Ltd','2023/259917/7','+27 33 032 2153','+27 82 269 2150','+27822692150','sales@vtsenergysecurity.co.za','info@vtsenergysecurity.co.za',E'18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa\n12 Kuhn St, Eveleigh, Boksburg, 1459, South Africa','South Africa | Zimbabwe | Zambia | Botswana | Namibia | Mozambique | Lesotho | Eswatini | Malawi','To provide reliable, affordable, and professional energy and security solutions that keep African businesses and communities powered, protected, and productive.','To become Southern Africa''s most trusted partner for integrated energy resilience and digital protection.','Reliability — We deliver what we promise, on time and to standard. | Trust — We build long-term relationships through honesty and transparency. | Excellence — We use quality products and certified professionals. | Innovation — We embrace modern technology to solve African challenges. | Safety — We protect people, property, and data at all times.')
+values(1,'VTS Energy & Security','Volt Tech Solutions (Pty) Ltd','2023/259917/7','+27 33 032 2153','+27 82 269 2150','+27822692150','sales@vtsenergysecurity.co.za','info@vtsenergysecurity.co.za','18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa','South Africa | Zimbabwe | Zambia | Botswana | Namibia | Mozambique | Lesotho | Eswatini | Malawi','To provide reliable, affordable, and professional energy and security solutions that keep African businesses and communities powered, protected, and productive.','To become Southern Africa''s most trusted partner for integrated energy resilience and digital protection.','Reliability — We deliver what we promise, on time and to standard. | Trust — We build long-term relationships through honesty and transparency. | Excellence — We use quality products and certified professionals. | Innovation — We embrace modern technology to solve African challenges. | Safety — We protect people, property, and data at all times.')
 on conflict(id) do nothing;
 
 insert into public.categories(name,display_order) 
@@ -177,6 +177,22 @@ values
   ('Cybersecurity',8),
   ('Other',9)
 on conflict(name) do nothing;
+
+-- Prevent repeated migrations/seeds from creating duplicate public service cards.
+-- Keep one row per category/name pair, preferring the earliest display order.
+delete from public.services
+where id in (
+  select id from (
+    select id, row_number() over (
+      partition by lower(trim(category)), lower(trim(name))
+      order by display_order asc, created_at asc, id asc
+    ) as rn
+    from public.services
+  ) ranked
+  where rn > 1
+);
+create unique index if not exists services_category_name_unique
+  on public.services (lower(trim(category)), lower(trim(name)));
 
 insert into public.services(name,category,description,display_order,image) 
 values
@@ -198,14 +214,14 @@ values
   ('Remote monitoring','Digital Security Solutions','Remote monitoring solutions for visibility over security systems and environments.',8,'remote'),
   ('Security audits','Digital Security Solutions','Security audits to review existing security arrangements and requirements.',9,'security-audit'),
   ('Vulnerability assessments','Digital Security Solutions','Vulnerability assessments to identify potential weaknesses requiring attention.',10,'vulnerability')
-on conflict do nothing;
+on conflict (lower(trim(category)), lower(trim(name))) do update set
+  description=excluded.description, display_order=excluded.display_order, image=excluded.image, active=true;
 
 insert into public.products(name,slug,category,short_description,description,price,price_type,image_url,featured,display_order,is_demo) 
 values
   ('5kW Hybrid Inverter','5kw-hybrid-inverter','Inverters','DEMO / REPLACE: A configurable hybrid inverter catalogue entry.','Demonstration entry. Replace with VTS-approved product data and verified specifications.',15000,'per unit','inverter.jpg',false,1,true),
   ('Lithium Battery Storage System','lithium-battery-storage-system','Batteries','DEMO / REPLACE: A battery storage catalogue entry.','Demonstration entry. Add verified capacity, chemistry, warranty and safety certifications.',25000,'per unit','battery.jpg',false,2,true),
   ('Solar Panel Package','solar-panel-package','Solar','DEMO / REPLACE: A configurable solar package entry.','Demonstration entry. Replace with exact panel model, quantity, mounting and verified system specs.',35000,'per unit','solar.jpg',false,3,true),
-  ('CCTV Surveillance Package','cctv-surveillance-package','CCTV','DEMO / REPLACE: A CCTV catalogue entry.','Demonstration entry. Replace with verified camera, recorder, storage and installation details.',12000,'per unit','cctv.jpg',false,4,true),
   ('Access Control System','access-control-system','Access Control','DEMO / REPLACE: A controlled-entry catalogue entry.','Demonstration entry. Replace with verified access hardware, reader type and installation specifications.',8000,'per unit','access.jpg',false,5,true)
 on conflict(slug) do nothing;
 
@@ -220,7 +236,7 @@ update public.site_settings set
   whatsapp='+27822692150',
   sales_email='sales@vtsenergysecurity.co.za',
   info_email='info@vtsenergysecurity.co.za',
-  address=E'18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa\n12 Kuhn St, Eveleigh, Boksburg, 1459, South Africa',
+  address='18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa',
   coverage='South Africa | Zimbabwe | Zambia | Botswana | Namibia | Mozambique | Lesotho | Eswatini | Malawi',
   mission='To provide reliable, affordable, and professional energy and security solutions that keep African businesses and communities powered, protected, and productive.',
   vision='To become Southern Africa''s most trusted partner for integrated energy resilience and digital protection.',
@@ -248,6 +264,9 @@ update public.services set description='Alarm systems for detection and security
 update public.services set description='Remote monitoring solutions for visibility over security systems and environments.' where name='Remote monitoring';
 update public.services set description='Security audits to review existing security arrangements and requirements.' where name='Security audits';
 update public.services set description='Vulnerability assessments to identify potential weaknesses requiring attention.' where name='Vulnerability assessments';
+
+-- Remove only the original demo CCTV product being replaced by the Solar Packages presentation.
+delete from public.products where slug='cctv-surveillance-package' and is_demo=true;
 
 -- Triggers for updated_at
 create or replace function public.touch_updated_at() returns trigger language plpgsql as $$
