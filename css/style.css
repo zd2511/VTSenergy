@@ -74,3 +74,24 @@ body[data-page="home"] .nav-toggle{color:#79f24d;border-color:rgba(121,242,77,.5
 body[data-page="home"] .brand img{filter:drop-shadow(0 2px 3px rgba(0,0,0,.55));}
 
 body[data-page="home"] .brand img{width:190px;height:72px;}
+
+/* Distinct page hero photography — keeps the existing layout while giving each section its own VTS theme. */
+.page-hero{position:relative;overflow:hidden;background-color:#07100b;background-size:cover;background-position:center;color:#fff}
+.page-hero:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,10,7,.92) 0%,rgba(4,10,7,.78) 42%,rgba(4,10,7,.45) 100%);pointer-events:none}
+.page-hero .container{position:relative;z-index:1}
+body[data-page="about"] .page-hero{background-image:url("https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=2200&q=88");background-position:center 58%}
+body[data-page="services"] .page-hero{background-image:url("https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=2200&q=88");background-position:center 48%}
+body[data-page="products"] .page-hero{background-image:url("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=2200&q=88");background-position:center 52%}
+body[data-page="contact"] .page-hero{background-image:url("https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=2200&q=88");background-position:center 45%}
+
+/* Keep the transparent VTS logo transparent across every page; never place it on a white card. */
+.brand{background:rgba(5,12,8,.34)!important;border:1px solid rgba(121,242,77,.28)!important;border-radius:10px!important;box-shadow:0 7px 22px rgba(0,0,0,.24)!important;padding:4px 8px!important;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.brand img{background:transparent!important}
+body:not([data-page="home"]) .nav{background:linear-gradient(180deg,rgba(4,10,7,.62),rgba(4,10,7,.18))!important;border-bottom:1px solid rgba(121,242,77,.22)!important}
+body:not([data-page="home"]) .nav-links a{color:#dce8df}
+body:not([data-page="home"]) .nav-links a.active,body:not([data-page="home"]) .nav-links a:hover{color:var(--green)}
+
+@media(max-width:600px){
+  .page-hero:before{background:linear-gradient(180deg,rgba(4,10,7,.88),rgba(4,10,7,.66))}
+  body[data-page="about"] .page-hero,body[data-page="services"] .page-hero,body[data-page="products"] .page-hero,body[data-page="contact"] .page-hero{background-position:center}
+}
