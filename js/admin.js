@@ -216,14 +216,37 @@ function previewImage(e){
   $('#editor-error').classList.add('hidden');newImageFile=file;
   const reader=new FileReader();reader.onload=ev=>{const el=$('#image-preview');el.style.backgroundImage=`url("${ev.target.result}")`;el.textContent=''};reader.onerror=()=>editorError('The selected image could not be read.');reader.readAsDataURL(file);
 }
+async function waitForPublicImage(url, attempts=6){
+  let lastError='The uploaded image is not readable yet.';
+  for(let attempt=0;attempt<attempts;attempt++){
+    const cacheBusted=`${url}${url.includes('?')?'&':'?'}v=${Date.now()}-${attempt}`;
+    try{
+      await new Promise((resolve,reject)=>{
+        const img=new Image();
+        const timer=setTimeout(()=>{img.onload=img.onerror=null;reject(new Error('Image load timed out.'))},5000);
+        img.onload=()=>{clearTimeout(timer);resolve()};
+        img.onerror=()=>{clearTimeout(timer);reject(new Error('Image is not available from storage yet.'))};
+        img.src=cacheBusted;
+      });
+      return url;
+    }catch(error){
+      lastError=error?.message||lastError;
+      if(attempt<attempts-1) await new Promise(resolve=>setTimeout(resolve,Math.min(1200*(attempt+1),4000)));
+    }
+  }
+  throw new Error(`${lastError} Please try again after checking the storage connection.`);
+}
 async function uploadImage(file){
   let ext=file.type==='image/jpeg'?'jpg':file.type.split('/')[1];
   let path;
   try{path=`products/${crypto.randomUUID()}.${ext}`}catch{path=`products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`}
-  const {error:e}=await withTimeout(supabase.storage.from('product-images').upload(path,file,{upsert:false,contentType:file.type}),15000,'Image upload timed out. Please check your connection and try again.');
+  const {error:e}=await withTimeout(supabase.storage.from('product-images').upload(path,file,{upsert:false,contentType:file.type,cacheControl:'3600'}),15000,'Image upload timed out. Please check your connection and try again.');
   if(e)throw new Error(`Image upload failed: ${e.message}`);
   const {data}=supabase.storage.from('product-images').getPublicUrl(path);
-  return data.publicUrl;
+  if(!data?.publicUrl)throw new Error('Storage returned no public image URL.');
+  // Supabase storage can acknowledge an upload before the public edge/cache can serve it.
+  // Wait for the actual image URL to become readable before the product row is saved.
+  return await waitForPublicImage(data.publicUrl);
 }
 function parseLines(value){return String(value||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean)}
 function syncProductCaches(){try{localStorage.setItem('vts_public_products',JSON.stringify(products.filter(p=>p.active)));localStorage.setItem('vts_featured_products',JSON.stringify(products.filter(p=>p.active&&p.featured).slice(0,6)))}catch{}}
@@ -264,7 +287,11 @@ async function saveProduct(e){
     const specifications=parseLines(f.elements.specifications.value);
     if(features.length)data.features=features;
     if(specifications.length)data.specifications=specifications;
-    if(newImageFile)data.image_url=await uploadImage(newImageFile);
+    let uploadedImagePath=null;
+    if(newImageFile){
+      data.image_url=await uploadImage(newImageFile);
+      uploadedImagePath=data.image_url;
+    }
     if(session!==editorSession)return;
 
     const id=f.elements.id.value.trim();

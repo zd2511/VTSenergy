@@ -1,4 +1,4 @@
-import { getSettings, whatsappUrl, HOMEPAGE_COVERAGE, REQUIRED_PHONE, REQUIRED_PHONE2 } from './data.js?v20260914-0915-vts';
+import { getSettings, whatsappUrl, HOMEPAGE_COVERAGE, REQUIRED_PHONE, REQUIRED_PHONE2, REQUIRED_ADDRESS, REQUIRED_ADDRESS2 } from './data.js?v20260911-1648-stable';
 
 const nav = document.querySelector('#site-nav');
 const footer = document.querySelector('#site-footer');
@@ -6,8 +6,7 @@ const page = document.body.dataset.page || '';
 let settings;
 
 function navMarkup(){return `<header class="nav" id="nav"><div class="container nav-inner"><a class="brand" href="index.html" aria-label="VTS Energy & Security home"><img src="assets/images/vts-logo.png" alt="VTS Energy & Security"></a><button class="nav-toggle" id="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav">☰</button><nav class="nav-links" id="primary-nav" aria-label="Primary"><a class="${page==='home'?'active':''}" href="index.html">Home</a><a class="${page==='services'?'active':''}" href="services.html">Services</a><a class="${page==='products'?'active':''}" href="products.html">Products</a><a class="${page==='about'?'active':''}" href="about.html">About</a><a class="${page==='contact'?'active':''}" href="contact.html">Contact</a><a class="nav-cta" href="contact.html">Request a Quote</a></nav></div></header>`}
-function escHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;"}[c]));}
-function footerMarkup(s){return `<footer class="site-footer"><div class="container"><div class="footer-grid"><div class="footer-col"><img class="footer-logo" src="assets/images/vts-logo.png" alt="VTS Energy & Security logo"><p>Integrated energy and digital security solutions for Southern Africa.</p></div><div class="footer-col"><h4>Quick Links</h4><a href="index.html">Home</a><a href="services.html">Services</a><a href="products.html">Products</a><a href="about.html">About</a><a href="contact.html">Contact</a><a class="footer-vts" href="admin/" aria-label="VTS administrator login">VTS</a></div><div class="footer-col"><h4>Solutions</h4><a href="services.html#energy">Energy Solutions</a><a href="services.html#security">Digital Security</a><a href="products.html">Product Catalogue</a></div><div class="footer-col"><h4>Contact</h4><a href="tel:${s.phone.replace(/\s/g,'')}">${s.phone}</a>${s.phone2?`<a href="tel:${s.phone2.replace(/\s/g,'')}">${s.phone2}</a>`:''}<a href="mailto:${s.sales_email}">${s.sales_email}</a><a href="mailto:${s.info_email}">${s.info_email}</a><p class="footer-address">${escHtml(s.address).replace(/\n/g,"<br>")}</p></div></div><div class="footer-bottom"><span>© 2026 VTS Energy & Security. All Rights Reserved.</span><span>${s.legal_name} · ${s.registration_number}</span></div></div></footer>`}
+function footerMarkup(s){const address1=s.address||REQUIRED_ADDRESS;const address2=s.address2||REQUIRED_ADDRESS2;return `<footer class="site-footer"><div class="container"><div class="footer-grid"><div class="footer-col"><img class="footer-logo" src="assets/images/vts-logo.png" alt="VTS Energy & Security logo"><p>Integrated energy and digital security solutions for Southern Africa.</p></div><div class="footer-col"><h4>Quick Links</h4><a href="index.html">Home</a><a href="services.html">Services</a><a href="products.html">Products</a><a href="about.html">About</a><a href="contact.html">Contact</a><a class="footer-vts" href="admin/" aria-label="VTS administrator login">VTS</a></div><div class="footer-col"><h4>Solutions</h4><a href="services.html#energy">Energy Solutions</a><a href="services.html#security">Digital Security</a><a href="products.html">Product Catalogue</a></div><div class="footer-col"><h4>Contact</h4><a href="tel:${s.phone.replace(/\s/g,'')}">${s.phone}</a>${s.phone2?`<a href="tel:${s.phone2.replace(/\s/g,'')}">${s.phone2}</a>`:''}<a href="mailto:${s.sales_email}">${s.sales_email}</a><a href="mailto:${s.info_email}">${s.info_email}</a><p><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address1)}" target="_blank" rel="noopener">${address1} ↗</a></p><p><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address2)}" target="_blank" rel="noopener">${address2} ↗</a></p></div></div><div class="footer-bottom"><span>© 2026 VTS Energy & Security. All Rights Reserved.</span><span>${s.legal_name} · ${s.registration_number}</span></div></div></footer>`}
 function toast(message,type='success'){const el=document.createElement('div');el.className='toast';el.textContent=message;document.body.appendChild(el);setTimeout(()=>el.remove(),3400)}
 window.VTS={toast,whatsappUrl,get settings(){return settings}};
 
@@ -24,7 +23,7 @@ async function boot(){
     navEl.querySelectorAll('.nav-links a').forEach(link=>link.addEventListener('click',closeMenu));
     document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
   }
-  const fallback={phone:REQUIRED_PHONE,phone2:REQUIRED_PHONE2,sales_email:'sales@vtsenergysecurity.co.za',info_email:'info@vtsenergysecurity.co.za',address:'18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa\n12 Kuhn St, Eveleigh, Boksburg, 1459, South Africa',legal_name:'Volt Tech Solutions (Pty) Ltd',registration_number:'2023/259917/7'};
+  const fallback={phone:REQUIRED_PHONE,phone2:REQUIRED_PHONE2,sales_email:'sales@vtsenergysecurity.co.za',info_email:'info@vtsenergysecurity.co.za',address:REQUIRED_ADDRESS,address2:REQUIRED_ADDRESS2,legal_name:'Volt Tech Solutions (Pty) Ltd',registration_number:'2023/259917/7'};
   // Render the footer immediately so a slow/offline Supabase connection can never make Quick Links disappear.
   if(footer) footer.innerHTML=footerMarkup(fallback);
   try{settings=await getSettings()}catch(e){settings=fallback}
@@ -37,12 +36,6 @@ async function boot(){
   const heroCoverage=document.querySelector('#hero-coverage-list');
   if(heroCoverage){
     heroCoverage.innerHTML=HOMEPAGE_COVERAGE.split('|').map(x=>`<span>${x.trim()}</span>`).join('');
-  }
-  const homeLocations=document.querySelector('#home-locations');
-  if(homeLocations){
-    const addresses=String((settings||fallback).address||'').split(/\n|\r\n|\s*\|\s*/).map(x=>x.trim()).filter(Boolean);
-    const unique=[...new Set(addresses)];
-    homeLocations.innerHTML=unique.map(address=>{const title=/Eveleigh|Boksburg/i.test(address)?'Boksburg Office':'Pietermaritzburg Office';const q=encodeURIComponent(address);return `<article class="location-card"><div class="map-copy"><span class="kicker">${title}</span><h2>${title.replace(' Office','')}.</h2><p>${address}</p><a class="btn btn-dark" href="https://www.google.com/maps/search/?api=1&query=${q}" target="_blank" rel="noopener">Open in Google Maps ↗</a></div><div class="map-frame"><iframe title="VTS Energy & Security ${title} map" src="https://www.google.com/maps?q=${q}&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div></article>`}).join('');
   }
   const homeWa=document.querySelector('#home-wa'); if(homeWa) homeWa.href=whatsappUrl(settings?.whatsapp);
 }

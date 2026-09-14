@@ -6,6 +6,8 @@ function timed(promise,label='The VTS data service timed out.'){return Promise.r
 export const REQUIRED_PHONE = '+27 33 032 2153';
 export const REQUIRED_PHONE2 = '+27 82 269 2150';
 export const REQUIRED_WHATSAPP = '+27822692150';
+export const REQUIRED_ADDRESS = '18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa';
+export const REQUIRED_ADDRESS2 = '12 Kuhn St, Eveleigh, Boksburg, 1459, South Africa';
 export const HOMEPAGE_COVERAGE = 'South Africa | Zimbabwe | Zambia | Botswana | Namibia | Mozambique | Lesotho | Eswatini | Malawi';
 export const REQUIRED_MISSION = 'To provide reliable, affordable, and professional energy and security solutions that keep African businesses and communities powered, protected, and productive.';
 export const REQUIRED_VISION = "To become Southern Africa's most trusted partner for integrated energy resilience and digital protection.";
@@ -20,7 +22,8 @@ export const fallbackSettings = {
   whatsapp: REQUIRED_WHATSAPP,
   sales_email: 'sales@vtsenergysecurity.co.za',
   info_email: 'info@vtsenergysecurity.co.za',
-  address: '18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa\n12 Kuhn St, Eveleigh, Boksburg, 1459, South Africa',
+  address: REQUIRED_ADDRESS,
+  address2: REQUIRED_ADDRESS2,
   coverage: 'South Africa | Zimbabwe | Zambia | Botswana | Namibia | Mozambique | Lesotho | Eswatini | Malawi',
   mission: REQUIRED_MISSION,
   vision: REQUIRED_VISION,
@@ -39,14 +42,16 @@ export async function getSettings() {
     whatsapp: REQUIRED_WHATSAPP,
     mission: REQUIRED_MISSION,
     vision: REQUIRED_VISION,
-      values: REQUIRED_VALUES
+      values: REQUIRED_VALUES,
+      address: data?.address || REQUIRED_ADDRESS,
+      address2: REQUIRED_ADDRESS2
     };
   } catch (error) {
     try {
       const cached = JSON.parse(localStorage.getItem('vts_site_settings') || 'null');
-      return { ...(cached || fallbackSettings), phone: REQUIRED_PHONE, phone2: REQUIRED_PHONE2, whatsapp: REQUIRED_WHATSAPP, mission: REQUIRED_MISSION, vision: REQUIRED_VISION, values: REQUIRED_VALUES };
+      return { ...(cached || fallbackSettings), phone: REQUIRED_PHONE, phone2: REQUIRED_PHONE2, whatsapp: REQUIRED_WHATSAPP, mission: REQUIRED_MISSION, vision: REQUIRED_VISION, values: REQUIRED_VALUES, address: cached?.address || REQUIRED_ADDRESS, address2: REQUIRED_ADDRESS2 };
     } catch {
-      return { ...fallbackSettings };
+      return { ...fallbackSettings, address: REQUIRED_ADDRESS, address2: REQUIRED_ADDRESS2 };
     }
   }
 }
@@ -55,11 +60,11 @@ export async function getPublicProducts() {
   try {
     const { data, error } = await timed(supabase.from('products').select('*').eq('active', true).order('display_order', { ascending: true }).order('created_at', { ascending: false }),'Product catalogue request timed out.');
     if (error) throw error;
-    const rows = data || [];
+    const rows = (data || []).filter(product => !(product?.is_demo && product?.slug === 'cctv-surveillance-package'));
     localStorage.setItem('vts_public_products', JSON.stringify(rows));
     return rows;
   } catch (error) {
-    try { return JSON.parse(localStorage.getItem('vts_public_products') || '[]'); } catch { return []; }
+    try { return JSON.parse(localStorage.getItem('vts_public_products') || '[]').filter(product => !(product?.is_demo && product?.slug === 'cctv-surveillance-package')); } catch { return []; }
   }
 }
 
@@ -67,18 +72,24 @@ export async function getFeaturedProducts() {
   try {
     const { data, error } = await timed(supabase.from('products').select('*').eq('active', true).eq('featured', true).order('display_order', { ascending: true }).limit(6),'Featured products request timed out.');
     if (error) throw error;
-    const rows = data || [];
+    const rows = (data || []).filter(product => !(product?.is_demo && product?.slug === 'cctv-surveillance-package'));
     localStorage.setItem('vts_featured_products', JSON.stringify(rows));
     return rows;
   } catch (error) {
-    try { return JSON.parse(localStorage.getItem('vts_featured_products') || '[]'); } catch { return []; }
+    try { return JSON.parse(localStorage.getItem('vts_featured_products') || '[]').filter(product => !(product?.is_demo && product?.slug === 'cctv-surveillance-package')); } catch { return []; }
   }
 }
 
 export async function getServices() {
   const { data, error } = await timed(supabase.from('services').select('*').eq('active', true).order('display_order', { ascending: true }),'Services request timed out.');
   if (error) throw error;
-  return data || [];
+  const seen = new Set();
+  return (data || []).filter(row => {
+    const key = `${String(row.category || '').trim().toLowerCase()}|${String(row.name || '').trim().toLowerCase()}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 export function formatMoney(value) {
