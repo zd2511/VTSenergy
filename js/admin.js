@@ -17,7 +17,7 @@ const DEFAULT_PRODUCT_CATEGORIES = [
   'Cybersecurity',
   'Other'
 ];
-const imgFallback='../assets/images/vts-logo.jpg';
+const imgFallback='../assets/images/vts-logo.png';
 function imageSrc(value){const v=String(value||'').trim();return /^https?:\/\//i.test(v)?v:imgFallback;}
 function formatMoney(value){ if(value===null||value===undefined||value==='') return ''; const n=Number(value); return Number.isFinite(n)?`R${new Intl.NumberFormat('en-ZA',{maximumFractionDigits:2}).format(n)}`:String(value); }
 function hasPromotion(product){ return Boolean(product?.promotion_status && product.promotion_status!=='none' && product?.original_price!==null && product?.original_price!==undefined && product?.sale_price!==null && product?.sale_price!==undefined); }

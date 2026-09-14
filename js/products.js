@@ -14,6 +14,30 @@ function card(p){return `<article class="product-card">${promotionMarkup(p)}<div
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function openProduct(p){if(!p||!p.id)return; const modal=document.querySelector('#product-modal'), content=document.querySelector('#product-modal-content'); if(!modal||!content){if(p.slug) window.location.href=`products.html?product=${encodeURIComponent(p.slug)}`; return;} const features=Array.isArray(p.features)?p.features:[]; const specs=Array.isArray(p.specifications)?p.specifications:[]; content.innerHTML=`<div class="modal-product"><div class="modal-product-image" style="background-image:url('${imageSrc(p.image_url)}')"></div><div class="modal-product-body"><span class="product-cat">${esc(p.category||'Other')}</span><h2>${esc(p.name)}</h2><div class="price ${hasPromotion(p)?'hidden':''}">${formatPrice(p)}</div>${promotionMarkup(p)}<p>${esc(p.description||p.short_description)}</p>${features.length?`<h3>Features</h3><ul class="spec-list">${features.map(x=>`<li>${esc(typeof x==='string'?x:x.label||'')}</li>`).join('')}</ul>`:''}${specs.length?`<h3>Specifications</h3><ul class="spec-list">${specs.map(x=>`<li>${esc(typeof x==='string'?x:`${x.label||''}: ${x.value||''}`)}</li>`).join('')}</ul>`:''}<a class="btn btn-primary" target="_blank" rel="noopener" href="${whatsappUrl(siteSettings?.whatsapp,p.name)}">Enquire About This Product on WhatsApp ↗</a></div></div>`; modal.classList.remove('hidden');modal.setAttribute('aria-hidden','false'); history.replaceState(null,'',`products.html?product=${encodeURIComponent(p.slug)}`)}
 function closeProduct(){const modal=document.querySelector('#product-modal');if(modal){modal.classList.add('hidden');modal.setAttribute('aria-hidden','true');if(location.search)history.replaceState(null,'','products.html')}}
+
+function isSolarPackage(p){
+  const text=`${p?.category||''} ${p?.name||''} ${p?.short_description||''}`.toLowerCase();
+  return /solar|pv|photovoltaic|solar system|solar package/.test(text);
+}
+function solarPackageCard(p){
+  const specs=[];
+  if(Array.isArray(p?.features)) specs.push(...p.features.map(x=>typeof x==='string'?x:(x?.label||'')));
+  if(Array.isArray(p?.specifications)) specs.push(...p.specifications.map(x=>typeof x==='string'?x:(x?.label?`${x.label}: ${x.value||''}`:'')));
+  const compact=[...new Set(specs.map(x=>String(x).trim()).filter(Boolean))].slice(0,4);
+  return `<article class="solar-package-card">${promotionMarkup(p)}<div class="solar-package-image" style="background-image:url('${imageSrc(p.image_url)}')"></div><div class="solar-package-body"><span class="product-cat">${esc(p.category||'Solar')}</span><h3>${esc(p.name)}</h3><p>${esc(p.short_description||p.description||'Solar package configured for your energy requirements.')}</p>${compact.length?`<ul>${compact.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}<div class="solar-package-foot"><strong>${formatPrice(p)}</strong><button class="btn btn-dark" data-solar-view="${p.id}">View Package</button></div></div></article>`;
+}
+function renderSolarPackages(products){
+  const grid=document.querySelector('#solar-packages-grid'), filters=document.querySelector('#solar-package-filters'), empty=document.querySelector('#solar-packages-empty');
+  if(!grid)return;
+  const solar=products.filter(isSolarPackage);
+  if(!solar.length){grid.innerHTML='';empty?.classList.remove('hidden');if(filters)filters.innerHTML='';return;}
+  empty?.classList.add('hidden');
+  const sizes=[...new Set(solar.map(p=>{const m=String(p.name||'').match(/\b(?:3(?:\.5)?|5|6|8|10|12|14|16|20)\s*kW\b/i);return m?m[0].replace(/\s+/g,' '):null}).filter(Boolean))];
+  if(filters){filters.innerHTML=['All',...sizes].map((x,i)=>`<button type="button" class="solution-filter${i===0?' active':''}" data-solar-filter="${esc(x)}">${esc(x)}</button>`).join('');filters.querySelectorAll('[data-solar-filter]').forEach(btn=>btn.addEventListener('click',()=>{filters.querySelectorAll('[data-solar-filter]').forEach(b=>b.classList.toggle('active',b===btn));const f=btn.dataset.solarFilter;draw(f==='All'?solar:solar.filter(p=>String(p.name||'').toLowerCase().includes(f.toLowerCase())))}));}
+  function draw(rows){grid.innerHTML=rows.slice(0,8).map(solarPackageCard).join('');grid.querySelectorAll('[data-solar-view]').forEach(b=>b.addEventListener('click',()=>openProduct(allProducts.find(p=>p.id===b.dataset.solarView))));}
+  draw(solar);
+}
+
 function solutionGroup(category=''){
   const value=String(category).toLowerCase();
   if(/cctv|camera|surveillance/.test(value)) return 'CCTV';
@@ -32,7 +56,7 @@ function renderFeaturedFilters(products, render){
   const host=document.querySelector('#featured-filters');
   if(!host)return;
   const groups=[...new Set(products.map(p=>solutionGroup(p.category)).filter(Boolean))];
-  const preferred=['Solar','Batteries','UPS','Inverters','Generators','CCTV','Access Control','Alarms','Digital Security'];
+  const preferred=['Solar','Batteries','UPS','Inverters','Generators','Access Control','Alarms','Digital Security'];
   const ordered=preferred.filter(x=>groups.includes(x)).concat(groups.filter(x=>!preferred.includes(x)).sort());
   host.innerHTML=['All',...ordered].map((name,i)=>`<button type="button" class="solution-filter${i===0?' active':''}" data-filter="${esc(name)}" aria-pressed="${i===0?'true':'false'}">${esc(name)}</button>`).join('');
   host.querySelectorAll('.solution-filter').forEach(button=>button.addEventListener('click',()=>{
@@ -44,6 +68,7 @@ function renderFeaturedFilters(products, render){
 async function boot(){
   const catalogue=document.querySelector('#product-catalogue'); const featured=document.querySelector('#featured-products'); if(!catalogue&&!featured)return;
   try{siteSettings=await getSettings(); allProducts=await getPublicProducts()}catch(e){if(catalogue)catalogue.innerHTML='<div class="empty-state">Product catalogue unavailable. Please check the site connection.</div>';return}
+  renderSolarPackages(allProducts);
   if(featured){
     let f=[]; try{f=await getFeaturedProducts()}catch(e){console.error('Featured products load failed:',e)}
     // If no products are explicitly marked Featured, keep the homepage populated with the latest catalogue items.

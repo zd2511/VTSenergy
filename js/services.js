@@ -22,5 +22,21 @@ const FALLBACK_SERVICES=[
 ['Digital Security Solutions','Security audits','Security audits to review existing security arrangements and requirements.','security-audit'],
 ['Digital Security Solutions','Vulnerability assessments','Vulnerability assessments to identify potential weaknesses requiring attention.','vulnerability']
 ].map(([category,name,description,image])=>({category,name,description,image}));
-async function boot(){const a=document.querySelector('#energy-services'),b=document.querySelector('#security-services');if(!a&&!b)return;try{const rows=await getServices();const usable=rows.length?rows:FALLBACK_SERVICES;a.innerHTML=usable.filter(x=>x.category==='Energy Solutions').map(card).join('');b.innerHTML=usable.filter(x=>x.category==='Digital Security Solutions').map(card).join('')}catch(e){a.innerHTML=FALLBACK_SERVICES.filter(x=>x.category==='Energy Solutions').map(card).join('');b.innerHTML=FALLBACK_SERVICES.filter(x=>x.category==='Digital Security Solutions').map(card).join('')}}
+function dedupe(rows){
+  const seen=new Set();
+  return rows.filter(x=>{
+    const key=`${String(x.category||'').trim().toLowerCase()}::${String(x.name||'').trim().toLowerCase()}`;
+    if(seen.has(key)) return false;
+    seen.add(key); return true;
+  });
+}
+async function boot(){
+  const a=document.querySelector('#energy-services'),b=document.querySelector('#security-services');
+  if(!a&&!b)return;
+  let usable=[];
+  try{const rows=await getServices(); usable=dedupe(rows.length?rows:FALLBACK_SERVICES);}
+  catch(e){usable=dedupe(FALLBACK_SERVICES);}
+  if(a)a.innerHTML=usable.filter(x=>x.category==='Energy Solutions').map(card).join('');
+  if(b)b.innerHTML=usable.filter(x=>x.category==='Digital Security Solutions').map(card).join('');
+}
 boot();

@@ -20,7 +20,7 @@ export const fallbackSettings = {
   whatsapp: REQUIRED_WHATSAPP,
   sales_email: 'sales@vtsenergysecurity.co.za',
   info_email: 'info@vtsenergysecurity.co.za',
-  address: '18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa',
+  address: '18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa\n12 Kuhn St, Eveleigh, Boksburg, 1459, South Africa',
   coverage: 'South Africa | Zimbabwe | Zambia | Botswana | Namibia | Mozambique | Lesotho | Eswatini | Malawi',
   mission: REQUIRED_MISSION,
   vision: REQUIRED_VISION,

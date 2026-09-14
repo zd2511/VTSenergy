@@ -162,7 +162,7 @@ create policy product_images_authenticated_delete on storage.objects for delete 
 
 -- Seed data
 insert into public.site_settings(id,company_name,legal_name,registration_number,phone,phone2,whatsapp,sales_email,info_email,address,coverage,mission,vision,values) 
-values(1,'VTS Energy & Security','Volt Tech Solutions (Pty) Ltd','2023/259917/7','+27 33 032 2153','+27 82 269 2150','+27822692150','sales@vtsenergysecurity.co.za','info@vtsenergysecurity.co.za','18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa','South Africa | Zimbabwe | Zambia | Botswana | Namibia | Mozambique | Lesotho | Eswatini | Malawi','To provide reliable, affordable, and professional energy and security solutions that keep African businesses and communities powered, protected, and productive.','To become Southern Africa''s most trusted partner for integrated energy resilience and digital protection.','Reliability — We deliver what we promise, on time and to standard. | Trust — We build long-term relationships through honesty and transparency. | Excellence — We use quality products and certified professionals. | Innovation — We embrace modern technology to solve African challenges. | Safety — We protect people, property, and data at all times.')
+values(1,'VTS Energy & Security','Volt Tech Solutions (Pty) Ltd','2023/259917/7','+27 33 032 2153','+27 82 269 2150','+27822692150','sales@vtsenergysecurity.co.za','info@vtsenergysecurity.co.za',E'18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa\n12 Kuhn St, Eveleigh, Boksburg, 1459, South Africa','South Africa | Zimbabwe | Zambia | Botswana | Namibia | Mozambique | Lesotho | Eswatini | Malawi','To provide reliable, affordable, and professional energy and security solutions that keep African businesses and communities powered, protected, and productive.','To become Southern Africa''s most trusted partner for integrated energy resilience and digital protection.','Reliability — We deliver what we promise, on time and to standard. | Trust — We build long-term relationships through honesty and transparency. | Excellence — We use quality products and certified professionals. | Innovation — We embrace modern technology to solve African challenges. | Safety — We protect people, property, and data at all times.')
 on conflict(id) do nothing;
 
 insert into public.categories(name,display_order) 
@@ -220,7 +220,7 @@ update public.site_settings set
   whatsapp='+27822692150',
   sales_email='sales@vtsenergysecurity.co.za',
   info_email='info@vtsenergysecurity.co.za',
-  address='18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa',
+  address=E'18 Stott Rd, Prestbury, Pietermaritzburg, 3201, South Africa\n12 Kuhn St, Eveleigh, Boksburg, 1459, South Africa',
   coverage='South Africa | Zimbabwe | Zambia | Botswana | Namibia | Mozambique | Lesotho | Eswatini | Malawi',
   mission='To provide reliable, affordable, and professional energy and security solutions that keep African businesses and communities powered, protected, and productive.',
   vision='To become Southern Africa''s most trusted partner for integrated energy resilience and digital protection.',
