@@ -50,29 +50,6 @@
 .solution-filter.active{background:#142019;color:#fff;border-color:#142019;box-shadow:0 0 0 1px rgba(121,242,77,.12)}
 @media(max-width:600px){.product-filter-buttons{gap:6px;margin-bottom:20px}.solution-filter{padding:8px 11px;font-size:.68rem}}
 
-/* VTS solar package catalogue + dual locations */
-.section-intro{max-width:720px;margin:14px 0 0;color:#66736a}
-.solar-packages-section{padding-top:70px;background:#f4f7f4}
-.solar-package-tools{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 22px}
-.solar-package-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-.solar-package-card{background:#fff;border:1px solid #dce5de;min-width:0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 30px rgba(7,16,11,.04)}
-.solar-package-image{height:155px;background:#e8eee9 center/cover no-repeat}
-.solar-package-body{padding:18px;display:flex;flex-direction:column;height:100%}
-.solar-package-body h3{font-size:1.18rem;margin:7px 0 8px}
-.solar-package-body p{font-size:.8rem;color:#68756c;line-height:1.6;margin:0 0 12px}
-.solar-package-body ul{margin:0 0 15px;padding-left:18px;color:#4d5b51;font-size:.73rem;line-height:1.7}
-.solar-package-foot{margin-top:auto;padding-top:13px;border-top:1px solid #e2e9e4;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.solar-package-foot strong{font:700 1rem/1.1 "Space Grotesk";white-space:nowrap}
-.solar-package-foot .btn{padding:10px 12px;font-size:.68rem}
-.locations-stack{display:grid;gap:18px}
-.location-card{display:grid;grid-template-columns:1fr 1.2fr;background:#fff;border:1px solid #dce5de;overflow:hidden}
-.location-card .map-copy{padding:34px}
-.location-card .map-copy h2{font-size:2rem;margin:9px 0 10px}
-.location-card .map-copy p{white-space:pre-line;color:#66736a;max-width:500px}
-.location-card .map-frame{min-height:300px}
-.location-card .map-frame iframe{width:100%;height:100%;min-height:300px;border:0;display:block}
-.footer-address{white-space:normal;line-height:1.65}
-.brand img{width:150px;height:72px;object-fit:contain;object-position:left center}
-.footer-logo{width:180px;height:86px;object-fit:contain;object-position:left center}
-@media(max-width:1050px){.solar-package-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:700px){.solar-package-grid{grid-template-columns:1fr}.location-card{grid-template-columns:1fr}.location-card .map-frame,.location-card .map-frame iframe{min-height:260px}.location-card .map-copy{padding:28px 24px}.solar-package-image{height:190px}}
+.section-intro{max-width:720px;margin:16px 0 0;color:#66736a;font-size:.92rem}.solar-packages-section{background:#edf2ee;padding-top:72px;padding-bottom:72px}.solar-package-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.solar-package-card{background:#fff;border:1px solid #d5dfd7;padding:24px;min-width:0;display:flex;flex-direction:column;align-items:flex-start}.solar-package-card.placeholder{border-style:dashed}.solar-package-top{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px}.solar-package-mark{width:38px;height:38px;border:1px solid #cbd8cf;display:grid;place-items:center;color:var(--green2);font-weight:900}.solar-package-card h3{margin:15px 0 8px}.solar-package-card p{font-size:.86rem;min-height:48px}.solar-package-details{width:100%;list-style:none;padding:0;margin:14px 0 18px;display:grid;gap:7px}.solar-package-details li{font-size:.78rem;padding-bottom:7px;border-bottom:1px solid #e2e8e3;color:#55635a}.solar-package-price{font:800 1.05rem "Space Grotesk";margin:4px 0 18px}.solar-package-card .btn{margin-top:auto}.two-location-grid{grid-template-columns:1fr 1fr;gap:18px}.location-card{border:1px solid #d5dfd7;background:#fff;overflow:hidden}.location-card .map-copy{padding:32px}.location-card .map-copy h3{font:700 1.7rem "Space Grotesk";margin:10px 0}.location-card .map-frame,.location-card .map-frame iframe{min-height:260px}.contact-maps{display:grid;grid-template-columns:1fr 1fr;gap:14px}.contact-maps .map-frame,.contact-maps .map-frame iframe{min-height:360px}
+@media(max-width:900px){.solar-package-grid{grid-template-columns:1fr 1fr}.two-location-grid,.contact-maps{grid-template-columns:1fr}}
+@media(max-width:600px){.solar-packages-section{padding-top:55px;padding-bottom:55px}.solar-package-grid{grid-template-columns:1fr}.location-card .map-copy{padding:28px 24px}.contact-maps .map-frame,.contact-maps .map-frame iframe{min-height:300px}}
