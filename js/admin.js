@@ -206,15 +206,42 @@ function openEditor(p){
   setTimeout(()=>form.elements.name.focus(),0);
 }
 function arrayLines(v){if(!Array.isArray(v))return '';return v.map(x=>typeof x==='string'?x:(x?.label?`${x.label}: ${x.value||''}`:'')).join('\n')}
-function closeEditor(){editorSession++;productSaving=false;setSaving(false);newImageFile=null;$('#product-image').value='';$('#product-editor').classList.add('hidden');$('#product-editor').setAttribute('aria-hidden','true')}
-function clearImage(){newImageFile=null;$('#product-image').value='';currentImagePath=null;renderImagePreview(null)}
+let previewObjectUrl=null;
+function revokePreviewObjectUrl(){if(previewObjectUrl){URL.revokeObjectURL(previewObjectUrl);previewObjectUrl=null}}
+function closeEditor(){editorSession++;productSaving=false;setSaving(false);newImageFile=null;$('#product-image').value='';revokePreviewObjectUrl();$('#product-editor').classList.add('hidden');$('#product-editor').setAttribute('aria-hidden','true')}
+function clearImage(){newImageFile=null;$('#product-image').value='';currentImagePath=null;revokePreviewObjectUrl();renderImagePreview(null)}
 function renderImagePreview(src){const el=$('#image-preview');if(src){el.style.backgroundImage=`url("${src}")`;el.textContent=''}else{el.style.backgroundImage='';el.textContent='No image selected'}}
 function previewImage(e){
   const file=e.target.files?.[0];if(!file)return;
   if(!['image/jpeg','image/png','image/webp'].includes(file.type)){e.target.value='';return editorError('Invalid image format. Use JPG, PNG, or WebP.')}
   if(file.size>5*1024*1024){e.target.value='';return editorError('Image is too large. Please choose an image under 5 MB.')}
-  $('#editor-error').classList.add('hidden');newImageFile=file;
-  const reader=new FileReader();reader.onload=ev=>{const el=$('#image-preview');el.style.backgroundImage=`url("${ev.target.result}")`;el.textContent=''};reader.onerror=()=>editorError('The selected image could not be read.');reader.readAsDataURL(file);
+
+  $('#editor-error').classList.add('hidden');
+  newImageFile=file;
+  revokePreviewObjectUrl();
+  const session=editorSession;
+  const objectUrl=URL.createObjectURL(file);
+  previewObjectUrl=objectUrl;
+  renderImagePreview(objectUrl);
+
+  // Do not use FileReader.readAsDataURL() here. On some mobile/browser file
+  // providers a selected file can transiently fail a FileReader read even
+  // though the File object itself is valid and can be uploaded. A blob URL
+  // previews the selected File directly and avoids copying the whole image
+  // into a base64 string. The Image check also prevents a stale asynchronous
+  // result from an earlier selection from replacing the current preview.
+  const probe=new Image();
+  probe.onload=()=>{
+    if(session!==editorSession || newImageFile!==file)return;
+    if(previewObjectUrl!==objectUrl)return;
+    renderImagePreview(objectUrl);
+  };
+  probe.onerror=()=>{
+    if(session!==editorSession || newImageFile!==file)return;
+    if(previewObjectUrl!==objectUrl)return;
+    editorError('The selected image could not be read. Please choose the image again.');
+  };
+  probe.src=objectUrl;
 }
 async function uploadImage(file){
   let ext=file.type==='image/jpeg'?'jpg':file.type.split('/')[1];
