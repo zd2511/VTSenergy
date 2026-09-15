@@ -219,29 +219,20 @@ function previewImage(e){
   $('#editor-error').classList.add('hidden');
   newImageFile=file;
   revokePreviewObjectUrl();
-  const session=editorSession;
-  const objectUrl=URL.createObjectURL(file);
-  previewObjectUrl=objectUrl;
-  renderImagePreview(objectUrl);
 
-  // Do not use FileReader.readAsDataURL() here. On some mobile/browser file
-  // providers a selected file can transiently fail a FileReader read even
-  // though the File object itself is valid and can be uploaded. A blob URL
-  // previews the selected File directly and avoids copying the whole image
-  // into a base64 string. The Image check also prevents a stale asynchronous
-  // result from an earlier selection from replacing the current preview.
-  const probe=new Image();
-  probe.onload=()=>{
-    if(session!==editorSession || newImageFile!==file)return;
-    if(previewObjectUrl!==objectUrl)return;
-    renderImagePreview(objectUrl);
-  };
-  probe.onerror=()=>{
-    if(session!==editorSession || newImageFile!==file)return;
-    if(previewObjectUrl!==objectUrl)return;
-    editorError('The selected image could not be read. Please choose the image again.');
-  };
-  probe.src=objectUrl;
+  // Do not read/probe the selected file here. Files selected from Android
+  // document/photo providers can be backed by a temporary content provider.
+  // FileReader(), Image(), and even an object-URL probe can race that provider
+  // and report a read/decode error even though the File is still uploadable.
+  // The selected File itself is the source of truth; uploadImage() handles the
+  // actual Storage operation and reports a real upload failure if one occurs.
+  try{
+    previewObjectUrl=URL.createObjectURL(file);
+    renderImagePreview(previewObjectUrl);
+  }catch(err){
+    console.warn('Could not create a local preview URL:',err);
+    renderImagePreview(null);
+  }
 }
 async function uploadImage(file){
   let ext=file.type==='image/jpeg'?'jpg':file.type.split('/')[1];
